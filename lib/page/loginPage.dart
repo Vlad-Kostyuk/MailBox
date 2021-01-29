@@ -1,27 +1,27 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:animated_button/animated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:animated_button/animated_button.dart';
 import 'package:mailbox/page/registrationPage.dart';
+import 'package:mailbox/service/LoginService.dart';
+import 'package:mailbox/service/SharedPreference.dart';
+
 import 'chat_page.dart';
 
 class LoginScreen extends StatefulWidget {
+  final _formKey = GlobalKey<FormState>();
+  final LoginService loginService = new LoginService();
+  final SharedPreference sharedPreference = new SharedPreference();
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
-
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
   String email = '';
   String password = '';
-  String error = '';
+  String errorEmail = '';
+  String errorPassword = '';
   bool rememberMe = false;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: ListView(
             children: <Widget>[
               Form(
-                key: _formKey,
+                key: widget._formKey,
                 child: Column(
                   children: <Widget>[
                     SizedBox(height: 5.0),
@@ -67,60 +67,21 @@ class _LoginScreenState extends State<LoginScreen> {
                             size: 80,
                             color: Colors.indigo[100],
                           )
-                        ]),
-
-
-                    // SizedBox(height: 20.0),
+                        ]
+                    ),
 
                     SizedBox(height: 10.0),
-                    Container(
-                      height: 80.0,
-                      child: TextFormField(
-                        keyboardType: TextInputType.emailAddress,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'OpenSans',
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'E-mail',
-                          labelStyle: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        validator: (val) =>
-                        val.isEmpty ? 'Enter an email' : null,
-                        onChanged: (val) {
-                          setState(() => email = val);
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    SizedBox(height: 10.0),
-                    Container(
-                      height: 80.0,
-                      child: TextFormField(
-                        keyboardType: TextInputType.visiblePassword,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'OpenSans',
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          labelStyle: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                        validator: (val) => val.length < 6
-                            ? 'Enter a password 6+ chars long'
-                            : null,
-                        obscureText: true,
-                        onChanged: (val) {
-                          setState(() => password = val);
-                        },
-                      ),
-                    ),
+
+                    emailTextForm(),
+
+                    this.errorEmail.isNotEmpty ? Text(this.errorEmail, style: TextStyle(color: Colors.red)) : Container(),
+
+                    SizedBox(height: 20.0),
+
+                    passwordTextForm(),
+
+                    this.errorPassword.isNotEmpty ? Text(this.errorPassword, style: TextStyle(color: Colors.red)) : Container(),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -131,12 +92,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                 data: ThemeData(
                                     unselectedWidgetColor: Colors.white),
                                 child: Checkbox(
-                                  value: rememberMe,
+                                  value: this.rememberMe,
                                   checkColor: Colors.white,
                                   activeColor: Colors.indigo,
                                   onChanged: (value) {
                                     setState(() {
-                                      rememberMe = value;
+                                      this.rememberMe = value;
                                     });
                                   },
                                 ),
@@ -149,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         Container(
                           child: FlatButton(
-                            onPressed: () => print("NON"),
+                            onPressed: () => print("Forgot Password"),
                             padding: EdgeInsets.only(right: 0.0),
                             child: Text(
                               'Forgot Password',
@@ -162,37 +123,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    Container(
-                      margin: EdgeInsets.symmetric(
-                        vertical:10,
-                        horizontal: 30,
-                      ),
-                      width: 400,
-                      height: 55,
-                      child: AnimatedButton(
-                        child: Text(
-                          'Login',
-                          style: TextStyle(color: Colors.white,
-                              fontSize: 24),
-                        ),
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => ChatScreen()),
-                                (Route<dynamic> route) => false,
-                          );
+                    buttonLogin(),
 
-
-
-                        },
-                        duration: 100,
-                        height: 54,  		// Button Height, default is 64
-                        width: 220,
-                        shadowDegree: ShadowDegree.dark,
-                        color: Colors.indigo,
-
-                      ),
-                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -227,11 +159,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
 
-                    SizedBox(height: 12.0),
-                    Text(
-                      error,
-                      style: TextStyle(color: Colors.red, fontSize: 14.0),
-                    )
                   ],
                 ),
               ),
@@ -239,4 +166,202 @@ class _LoginScreenState extends State<LoginScreen> {
           )),
     );
   }
+
+  Widget buttonLogin() {
+    return Container(
+      margin: EdgeInsets.symmetric(
+        vertical: 10,
+        horizontal: 30,
+      ),
+      width: 400,
+      height: 55,
+      child: AnimatedButton(
+        child: Text(
+          'Login',
+          style: TextStyle(color: Colors.white,
+              fontSize: 24),
+        ),
+        onPressed: () async {
+          validatedLogin(this.email, this.password);
+        },
+        duration: 100,
+        height: 54,
+        width: 220,
+        shadowDegree: ShadowDegree.dark,
+        color: Colors.indigo,
+      ),
+    );
+  }
+
+  Widget passwordTextForm() {
+    return Container(
+      height: 80.0,
+      child: TextFormField(
+        keyboardType: TextInputType.visiblePassword,
+        style: TextStyle(
+          color: Colors.black,
+          fontFamily: 'OpenSans',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'Password',
+          labelStyle: TextStyle(
+            color: Colors.black,
+          ),
+        ),
+        validator: (val) => val.length < 6 ? 'Enter a password 6+ chars long'
+            : null,
+        obscureText: true,
+        onChanged: (val) {
+          setState(() => this.password = val.trim());
+        },
+      ),
+    );
+  }
+
+  Widget emailTextForm() {
+   return Container(
+      height: 80.0,
+      child: TextFormField(
+        keyboardType: TextInputType.emailAddress,
+        style: TextStyle(
+          color: Colors.black,
+          fontFamily: 'OpenSans',
+        ),
+        decoration: const InputDecoration(
+          labelText: 'E-mail',
+          labelStyle: TextStyle(
+            color: Colors.black,
+          ),
+        ),
+        validator: (val) => val.isEmpty ? 'Enter an email' : null,
+        onChanged: (val) {
+          setState(() => this.email = val.trim());
+        },
+      ),
+    );
+  }
+
+  validatedLogin(String email, String password) async {
+    this.errorEmail = '';
+    this.errorPassword = '';
+
+    if(checkLoginIsNull(email, password)) {
+      sendToHomePage(await widget.loginService.signIn(email.trim(), password.trim()));
+    }
+  }
+
+  void sendToHomePage(var resultLoginService) {
+    if(resultLoginService is bool && this.rememberMe) {
+      saveUserEmailAndPassport();
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ChatScreen()), (Route<dynamic> route) => false);
+    }
+
+    if(resultLoginService is bool) {
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ChatScreen()), (Route<dynamic> route) => false);
+    } else {
+      validatedErrorCode(resultLoginService);
+    }
+  }
+
+  void saveUserEmailAndPassport() {
+    widget.sharedPreference.setBoolUserIsLogin(true);
+    widget.sharedPreference.setUserLogin(email);
+    widget.sharedPreference.setUserPassword(password);
+  }
+
+
+  void validatedErrorCode(var resultLoginService) {
+    switch (resultLoginService) {
+      case "ERROR_INVALID_EMAIL":
+        setState(() {
+          this.errorEmail = "Your email address appears to be malformed.";
+        });
+        break;
+      case "ERROR_WRONG_PASSWORD":
+        setState(() {
+          this.errorPassword = "Your password is wrong.";
+        });
+        break;
+      case "ERROR_USER_NOT_FOUND":
+        setState(() {
+          this.errorEmail = "User with this email doesn't exist.";
+        });
+        break;
+      case "ERROR_USER_DISABLED":
+        setState(() {
+          this.errorEmail = "User with this email has been disabled.";
+        });
+        break;
+      case "ERROR_TOO_MANY_REQUESTS":
+        setState(() {
+          this.errorEmail = "Too many requests. Try again later.";
+        });
+        break;
+      default:
+        setState(() {
+          this.errorEmail = "An undefined Error happened.";
+        });
+    }
+  }
+
+
+  bool checkLoginIsNull(String email, String password) {
+    if(password == null  && email == null) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(password == null && email != null) {
+      setState(() {
+        this.errorEmail = '';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(email == null && password != null) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = '';
+      });
+      return false;
+    } else {
+      return checkLoginIsNotEmpty(email, password);
+    }
+  }
+
+  bool checkLoginIsNotEmpty(String email, String password) {
+    if(password.isEmpty  && email.isEmpty) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(password.isEmpty && email.isNotEmpty) {
+      setState(() {
+        this.errorEmail = '';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(email.isEmpty && password.isNotEmpty) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = '';
+      });
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+
 }
+
+

@@ -1,5 +1,5 @@
 class User {
-  int id;
+  String id;
   String userName;
   String email;
   String photoUrl;
