@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "357763788158",
+    "project_id": "mailbox-c8d78",
+    "storage_bucket": "mailbox-c8d78.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:357763788158:android:d511aed245807f26f3572f",
+        "android_client_info": {
+          "package_name": "com.example.mail_box"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "357763788158-4h5v2ijars9t4hfm70msj0nga9cfdd3j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAR6hd1Cbn24OAGZ_bT3CdgLMrWsBy-6VQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "357763788158-4h5v2ijars9t4hfm70msj0nga9cfdd3j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:357763788158:android:eff6648944910266f3572f",
+        "android_client_info": {
+          "package_name": "com.example.mailbox"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "357763788158-4h5v2ijars9t4hfm70msj0nga9cfdd3j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAR6hd1Cbn24OAGZ_bT3CdgLMrWsBy-6VQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "357763788158-4h5v2ijars9t4hfm70msj0nga9cfdd3j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
