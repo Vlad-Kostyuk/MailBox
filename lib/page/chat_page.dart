@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:mailbox/page/registrationPage.dart';
-
+import 'package:mailbox/service/LoginService.dart';
 import 'loginPage.dart';
 
 
-
 class ChatScreen extends StatefulWidget {
-  final Function toggleView;
-  ChatScreen({this.toggleView});
+  final LoginService loginService = new LoginService();
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -20,11 +16,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   TextEditingController _textController = TextEditingController();
   List<MyMessage> _messages = <MyMessage>[];
   bool _isWriting = false;
-
   Animation<double> _sendButtonAnimation;
   AnimationController _sendButtonAnimationController;
-
-
   String userName = "Serhii Senyk";
 
   @override
@@ -70,6 +63,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             icon: Icon(Icons.logout),
             label: Text(''),
             onPressed: (){
+              widget.loginService.signingOut();
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -176,8 +170,8 @@ class MyMessage extends StatelessWidget {
   String userName;
   AnimationController sendMessageAnimationController;
   String currentTime = DateTime.now().hour.toString() + ':' +
-                       DateTime.now().minute.toString() ;//+ ':' +
-                       //DateTime.now().second.toString();
+                       DateTime.now().minute.toString();
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,10 +1,12 @@
 import 'package:animated_button/animated_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mailbox/bloc/BlocLoginPage.dart';
 import 'package:mailbox/page/registrationPage.dart';
 import 'package:mailbox/service/LoginService.dart';
 import 'package:mailbox/service/SharedPreference.dart';
-
 import 'chat_page.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,15 +15,31 @@ class LoginScreen extends StatefulWidget {
   final SharedPreference sharedPreference = new SharedPreference();
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState(email: '', password: '',
+    errorEmail: '', errorPassword: '', rememberMe: false);
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String email = '';
-  String password = '';
-  String errorEmail = '';
-  String errorPassword = '';
-  bool rememberMe = false;
+  String email;
+  String password;
+  String errorEmail;
+  String errorPassword;
+  bool rememberMe;
+
+  _LoginScreenState({
+    this.email,
+    this.password,
+    this.errorEmail,
+    this.errorPassword,
+    this.rememberMe
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    //widget.sharedPreference.initializedSharedPreference();
+    BlocProvider.of<BlocLoginPage>(context).add(LoginPageLoadedEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,134 +54,186 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Color.fromRGBO(236, 241, 247, 1),
       ),
       body: Container(
-          color: Color.fromRGBO(236, 241, 247, 1),
-          padding: EdgeInsets.symmetric(
-            vertical: 30.0,
-            horizontal: 50.0,
-          ),
-          child: ListView(
-            children: <Widget>[
-              Form(
-                key: widget._formKey,
-                child: Column(
-                  children: <Widget>[
-                    SizedBox(height: 5.0),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(
-                            'Log In',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'OpenSans',
-                              fontSize: 30.0,
-                              height: 3,
-                              fontWeight: FontWeight.bold,
+        child: BlocBuilder<BlocLoginPage, LoginState>(
+          builder: (BuildContext context, state) {
+
+            print(state);
+
+            if(state is LoginPageLoadingState) {
+               return Container(
+                   color: Color.fromRGBO(236, 241, 247, 1),
+                   child: Center(
+                     child: new ListView(
+                         shrinkWrap: true,
+                         padding: const EdgeInsets.all(20.0),
+                         children: [
+                           Center(child: new Text('Loading..')),
+                           Center(child: CircularProgressIndicator())
+                         ]
+                     ),
+                   )
+               );
+            }
+
+            if(state is LoginPageUserIsLoginState) {
+              SchedulerBinding.instance.addPostFrameCallback((_) {
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ChatScreen()), (Route<dynamic> route) => false);
+              });
+            }
+
+            if(state is LoginPageUserLoadedState) {
+              return Container(
+                  color: Color.fromRGBO(236, 241, 247, 1),
+                  padding: EdgeInsets.symmetric(
+                    vertical: 30.0,
+                    horizontal: 50.0,
+                  ),
+                  child: ListView(
+                    children: <Widget>[
+                      Form(
+                        key: widget._formKey,
+                        child: Column(
+                          children: <Widget>[
+                            SizedBox(height: 5.0),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Text(
+                                    'Log In',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: 'OpenSans',
+                                      fontSize: 30.0,
+                                      height: 3,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.account_box,
+                                    size: 80,
+                                    color: Colors.indigo[100],
+                                  )
+                                ]
                             ),
-                          ),
-                          Icon(
-                            Icons.account_box,
-                            size: 80,
-                            color: Colors.indigo[100],
-                          )
-                        ]
-                    ),
 
-                    SizedBox(height: 10.0),
+                            SizedBox(height: 10.0),
 
-                    emailTextForm(),
+                            emailTextForm(),
 
-                    this.errorEmail.isNotEmpty ? Text(this.errorEmail, style: TextStyle(color: Colors.red)) : Container(),
+                            this.errorEmail.isNotEmpty ? Text(this.errorEmail, style: TextStyle(color: Colors.red)) : Container(),
 
-                    SizedBox(height: 20.0),
+                            SizedBox(height: 20.0),
 
-                    passwordTextForm(),
+                            passwordTextForm(),
 
-                    this.errorPassword.isNotEmpty ? Text(this.errorPassword, style: TextStyle(color: Colors.red)) : Container(),
+                            this.errorPassword.isNotEmpty ? Text(this.errorPassword, style: TextStyle(color: Colors.red)) : Container(),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          child: Row(
-                            children: <Widget>[
-                              Theme(
-                                data: ThemeData(
-                                    unselectedWidgetColor: Colors.white),
-                                child: Checkbox(
-                                  value: this.rememberMe,
-                                  checkColor: Colors.white,
-                                  activeColor: Colors.indigo,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      this.rememberMe = value;
-                                    });
-                                  },
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Container(
+                                  child: Row(
+                                    children: <Widget>[
+                                      Theme(
+                                        data: ThemeData(
+                                            unselectedWidgetColor: Colors.white),
+                                        child: Checkbox(
+                                          value: this.rememberMe,
+                                          checkColor: Colors.white,
+                                          activeColor: Colors.indigo,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              this.rememberMe = value;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      Text(
+                                        "Remember me",
+                                      )
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                "Remember me",
-                              )
-                            ],
-                          ),
-                        ),
-                        Container(
-                          child: FlatButton(
-                            onPressed: () => print("Forgot Password"),
-                            padding: EdgeInsets.only(right: 0.0),
-                            child: Text(
-                              'Forgot Password',
-                              style: TextStyle(
-                                  color: Colors.grey[800]
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    buttonLogin(),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          'Don\'t have an Account? ',
-                          style: TextStyle(
-                            color: Colors.grey[800],
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        FlatButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => RegistrationScreen()),
-                          ),
-                          child: RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Sign In',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
+                                Container(
+                                  child: FlatButton(
+                                    onPressed: () => print("Forgot Password"),
+                                    padding: EdgeInsets.only(right: 0.0),
+                                    child: Text(
+                                      'Forgot Password',
+                                      style: TextStyle(
+                                          color: Colors.grey[800]
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
 
-                  ],
-                ),
-              ),
-            ],
-          )),
+                            buttonLogin(),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Text(
+                                  'Don\'t have an Account? ',
+                                  style: TextStyle(
+                                    color: Colors.grey[800],
+                                    fontSize: 15.0,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                FlatButton(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => RegistrationScreen()),
+                                  ),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: 'Sign In',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+              );
+            }
+
+            if(state is LoginPageErrorState) {
+              return Container(
+                color: Color.fromRGBO(236, 241, 247, 1),
+                child: Center(
+                  child: new ListView(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.all(20.0),
+                      children: [
+                        Center(child: new Text('Loading..')),
+                        Center(child: CircularProgressIndicator())
+                      ]
+                  ),
+                )
+              );
+            }
+
+            return Container();
+          },
+        ),
+      )
     );
   }
 
@@ -269,7 +339,6 @@ class _LoginScreenState extends State<LoginScreen> {
     widget.sharedPreference.setUserPassword(password);
   }
 
-
   void validatedErrorCode(var resultLoginService) {
     switch (resultLoginService) {
       case "ERROR_INVALID_EMAIL":
@@ -303,7 +372,6 @@ class _LoginScreenState extends State<LoginScreen> {
         });
     }
   }
-
 
   bool checkLoginIsNull(String email, String password) {
     if(password == null  && email == null) {
@@ -360,8 +428,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return true;
     }
   }
-
-
 }
 
 

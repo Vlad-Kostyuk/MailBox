@@ -1,29 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:animated_button/animated_button.dart';
 import 'chat_page.dart';
 import 'loginPage.dart';
 
 
 class RegistrationScreen extends StatefulWidget {
-
   RegistrationScreen({this.toggleView});
-
   final Function toggleView;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  final _formKey = GlobalKey<FormState>();
-
-  String error = "";
+  String error = '';
   String email = '';
   String password = '';
-  String firstName = " ";
-  String secondName = " ";
+  String userName = '';
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +43,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           child: ListView(
             children: <Widget>[
               Form(
-                key: _formKey,
+                key: widget._formKey,
                 child: Column(
                   children: <Widget>[
                     Row(
@@ -72,16 +68,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ]),
 
                     SizedBox(height: 10.0),
-                    //First Name
 
-                    //SizedBox(height: 10.0),
                     Container(
                       height: 60.0,
                       child: TextFormField(
                         validator: (val) =>
                         val.isEmpty ? 'First Name' : null,
                         onChanged: (val) {
-                          setState(() => firstName = val);
+                          setState(() => userName = val);
                         },
                         keyboardType: TextInputType.text,
                         style: TextStyle(
@@ -91,29 +85,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         decoration: const InputDecoration(
                             labelText: 'First Name',
                             labelStyle: TextStyle(
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(height: 10.0),
-                    Container(
-                      height: 60.0,
-                      child: TextFormField(
-                        validator: (val) =>
-                        val.isEmpty ? 'Enter an Second Name' : null,
-                        onChanged: (val) {
-                          setState(() => secondName = val);
-                        },
-                        keyboardType: TextInputType.text,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'OpenSans',
-                        ),
-                        decoration: const InputDecoration(
-                          labelText: 'Second Name',
-                          labelStyle: TextStyle(
                             color: Colors.black,
                           ),
                         ),
@@ -143,7 +114,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         },
                       ),
                     ),
-
 
                     SizedBox(height: 10.0),
                     Container(
@@ -175,22 +145,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       margin: EdgeInsets.symmetric(
                         vertical:10,
                         horizontal: 30,
-                      ),//all(25),
+                      ),
                       width: 410,
                       height: 55,
-                     /*decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.lightGreen, Colors.lightBlue],
-                          begin: FractionalOffset.topLeft,
-                          end: FractionalOffset.bottomRight,
-                        ),
-                       /* borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20.0),
-                          topRight: Radius.circular(20.0),
-                          bottomRight: Radius.circular(20.0),
-                          topLeft: Radius.circular(20.0),
-                        ),*/
-                      ),*/
                       child: AnimatedButton(
 
                         child: Text(
@@ -198,7 +155,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           style: TextStyle(color: Colors.white,
                               fontSize: 24),
                         ),
-
 
                         onPressed: () {
                           Navigator.pushAndRemoveUntil(
@@ -254,5 +210,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             ],
           )),
     );
+
   }
 }

@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreference {
-
+/*
   initializedSharedPreference() async {
     SharedPreferences preference = await SharedPreferences.getInstance();
     preference.setBool('userIsLogin', false);
@@ -9,6 +9,8 @@ class SharedPreference {
     preference.setString('userPassword', '');
   }
 
+
+ */
   setBoolUserIsLogin(bool userIsLogin) async {
     try {
       SharedPreferences preference = await SharedPreferences.getInstance();
@@ -26,34 +28,34 @@ class SharedPreference {
       return preference.getBool('userIsLogin');
     } catch (error) {
       print(error);
-      return error;
+      return false;
     }
   }
 
   getUserLogin() async {
     try {
       SharedPreferences preference = await SharedPreferences.getInstance();
-      return preference.getBool('userLogin');
+      return preference.getString('userLogin');
     } catch (error) {
       print(error);
-      return error;
+      return false;
     }
   }
 
   getUserPassword() async {
     try {
       SharedPreferences preference = await SharedPreferences.getInstance();
-      return preference.getBool('userPassword');
+      return preference.getString('userPassword');
     } catch (error) {
       print(error);
-      return error;
+      return false;
     }
   }
 
   setUserLogin(String userLogin) async {
     try {
       SharedPreferences preference = await SharedPreferences.getInstance();
-      return preference.getBool('userLogin');
+      return preference.setString('userLogin', userLogin);
     } catch (error) {
       print(error);
       return error;
@@ -63,7 +65,7 @@ class SharedPreference {
   setUserPassword(String userPassword) async {
     try {
       SharedPreferences preference = await SharedPreferences.getInstance();
-      return preference.getBool('userPassword');
+      return preference.setString('userPassword', userPassword);
     } catch (error) {
       print(error);
       return error;
