@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:animated_button/animated_button.dart';
 import 'package:mailbox/service/LoginService.dart';
+import 'package:mailbox/service/SharedPreference.dart';
 import 'ChatPage.dart';
 import 'loginPage.dart';
 
@@ -10,6 +11,7 @@ class RegistrationScreen extends StatefulWidget {
   RegistrationScreen({this.toggleView});
   final Function toggleView;
   final _formKey = GlobalKey<FormState>();
+  final SharedPreference sharedPreference = new SharedPreference();
 
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
@@ -164,7 +166,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
 
                         onPressed: () {
-                          checkLoginIsNull(email, password);
+                          validatedLogin(email, password);
                         },
                           duration: 100,
                           height: 54,
@@ -223,7 +225,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if(checkLoginIsNull(email, password)) {
       final LoginService loginService = new LoginService();
       loginService.registrationNewUser(email.trim(), password.trim());
-
+      saveUserEmailAndPassport();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => ChatScreen()),
@@ -232,6 +234,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
+  void saveUserEmailAndPassport() {
+    widget.sharedPreference.setBoolUserIsLogin(true);
+    widget.sharedPreference.setUserLogin(email);
+    widget.sharedPreference.setUserPassword(password);
+  }
 
   void validatedErrorCode(var resultLoginService) {
     switch (resultLoginService) {
