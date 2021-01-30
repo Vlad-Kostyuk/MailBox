@@ -82,7 +82,8 @@ class LoginService {
 
   Future<bool> reauthenticatingUser() async {
     final SharedPreference sharedPreference = new SharedPreference();
-    if(await sharedPreference.getBoolUserIsLogin()) {
+     bool tmp = await sharedPreference.getBoolUserIsLogin();
+    if(tmp) {
       final String _email = await sharedPreference.getUserLogin();
       final String _password = await sharedPreference.getUserPassword();
 

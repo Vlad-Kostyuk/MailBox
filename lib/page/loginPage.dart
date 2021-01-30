@@ -37,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    //widget.sharedPreference.initializedSharedPreference();
+    widget.sharedPreference.initializedSharedPreference();
     BlocProvider.of<BlocLoginPage>(context).add(LoginPageLoadedEvent());
   }
 
