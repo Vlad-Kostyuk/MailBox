@@ -16,7 +16,8 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  String error = '';
+  String errorEmail = '';
+  String errorPassword = '';
   String email = '';
   String password = '';
   String userName = '';
@@ -116,6 +117,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
 
+                    this.errorEmail.isNotEmpty ? Text(this.errorEmail, style: TextStyle(color: Colors.red)) : Container(),
+
                     SizedBox(height: 10.0),
                     Container(
                       height: 60.0,
@@ -140,6 +143,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         },
                       ),
                     ),
+
+                    this.errorPassword.isNotEmpty ? Text(this.errorPassword, style: TextStyle(color: Colors.red)) : Container(),
+
                     SizedBox(height: 15.0),
                     Container(
 
@@ -158,15 +164,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
 
                         onPressed: () {
-
-                          final LoginService loginService = new LoginService();
-                          loginService.registrationNewUser(email.trim(), password.trim());
-
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => ChatScreen()),
-                                (Route<dynamic> route) => false,
-                          );
+                          checkLoginIsNull(email, password);
                         },
                           duration: 100,
                           height: 54,
@@ -217,4 +215,113 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
 
   }
+
+  validatedLogin(String email, String password) async {
+    this.errorEmail = '';
+    this.errorPassword = '';
+
+    if(checkLoginIsNull(email, password)) {
+      final LoginService loginService = new LoginService();
+      loginService.registrationNewUser(email.trim(), password.trim());
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => ChatScreen()),
+            (Route<dynamic> route) => false,
+      );
+    }
+  }
+
+
+  void validatedErrorCode(var resultLoginService) {
+    switch (resultLoginService) {
+      case "ERROR_INVALID_EMAIL":
+        setState(() {
+          this.errorEmail = "Your email address appears to be malformed.";
+        });
+        break;
+      case "ERROR_WRONG_PASSWORD":
+        setState(() {
+          this.errorPassword = "Your password is wrong.";
+        });
+        break;
+      case "ERROR_USER_NOT_FOUND":
+        setState(() {
+          this.errorEmail = "User with this email doesn't exist.";
+        });
+        break;
+      case "ERROR_USER_DISABLED":
+        setState(() {
+          this.errorEmail = "User with this email has been disabled.";
+        });
+        break;
+      case "ERROR_TOO_MANY_REQUESTS":
+        setState(() {
+          this.errorEmail = "Too many requests. Try again later.";
+        });
+        break;
+      default:
+        setState(() {
+          this.errorEmail = "An undefined Error happened.";
+        });
+    }
+  }
+
+  bool checkLoginIsNull(String email, String password) {
+    if(password == null  && email == null) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(password == null && email != null) {
+      setState(() {
+        this.errorEmail = '';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(email == null && password != null) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = '';
+      });
+      return false;
+    } else {
+      return checkLoginIsNotEmpty(email, password);
+    }
+  }
+
+  bool checkLoginIsNotEmpty(String email, String password) {
+    if(password.isEmpty  && email.isEmpty) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(password.isEmpty && email.isNotEmpty) {
+      setState(() {
+        this.errorEmail = '';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(email.isEmpty && password.isNotEmpty) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = '';
+      });
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
+
+
