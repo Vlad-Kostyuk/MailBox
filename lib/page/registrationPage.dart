@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:animated_button/animated_button.dart';
-import 'chat_page.dart';
+import 'package:mailbox/service/LoginService.dart';
+import 'ChatPage.dart';
 import 'loginPage.dart';
 
 
@@ -157,6 +158,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
 
                         onPressed: () {
+
+                          final LoginService loginService = new LoginService();
+                          loginService.registrationNewUser(email.trim(), password.trim());
+
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(builder: (context) => ChatScreen()),

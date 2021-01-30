@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:mailbox/model/User.dart';
 
 import 'SharedPreference.dart';
@@ -79,6 +80,8 @@ class LoginService {
       return false;
     }
   }
+
+
 
   Future<bool> reauthenticatingUser() async {
     final SharedPreference sharedPreference = new SharedPreference();

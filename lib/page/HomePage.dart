@@ -16,14 +16,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  InternetConnectivity internetConnectivity = new InternetConnectivity();
+  //InternetConnectivity internetConnectivity = new InternetConnectivity(context);
 
   var tmp = false;
 
   @override
   void initState() {
     super.initState();
-    internetConnectivity.initializedInternetConnectivity();
+   // internetConnectivity.initializedInternetConnectivity();
   }
 
   @override
@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
           ),
           body: Container(
             child: StreamBuilder<ConnectivityResult>(
-              stream: internetConnectivity.counterUpdates,
+              //stream: internetConnectivity.counterUpdates,
               // ignore: missing_return
               builder: (context, snapshot) {
                 if (snapshot != null && snapshot.hasData) {

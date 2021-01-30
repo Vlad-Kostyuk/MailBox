@@ -16,7 +16,6 @@ class BlocLoginPage extends Bloc<LoginEvent, LoginState> {
     try {
       final LoginService loginService = new LoginService();
       var tmp  = await loginService.reauthenticatingUser();
-      print('ffff${tmp}');
       if(tmp) {
         yield LoginPageUserIsLoginState();
       } else {

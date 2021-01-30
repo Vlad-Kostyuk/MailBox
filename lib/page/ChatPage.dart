@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mailbox/page/startPage.dart';
+import 'package:mailbox/service/ConnectivityInternet.dart';
 import 'package:mailbox/service/FirebaseDaraStore.dart';
 
 import 'loginPage.dart';
@@ -33,6 +34,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void initSendButtonAnimation(){
+    InternetConnectivity internetConnectivity = new InternetConnectivity(context);
+    internetConnectivity.initializedInternetConnectivity();
     this._sendButtonAnimationController = AnimationController(
         duration: const Duration(seconds:2), vsync: this
     )..repeat(reverse: true);

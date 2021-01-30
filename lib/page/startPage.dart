@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mailbox/bloc/BlocLoginPage.dart';
+import 'package:mailbox/service/ConnectivityInternet.dart';
 import 'loginPage.dart';
 
 class StartPage extends StatefulWidget {
@@ -16,6 +17,8 @@ class _StartPageState extends State<StartPage> {
   @override
   void initState() {
     super.initState();
+    InternetConnectivity internetConnectivity = new InternetConnectivity(context);
+    internetConnectivity.initializedInternetConnectivity();
     Firebase.initializeApp().whenComplete(() {
       print("completed");
       setState(() {});

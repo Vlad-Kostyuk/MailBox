@@ -5,9 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mailbox/bloc/BlocLoginPage.dart';
 import 'package:mailbox/page/registrationPage.dart';
+import 'package:mailbox/service/ConnectivityInternet.dart';
 import 'package:mailbox/service/LoginService.dart';
 import 'package:mailbox/service/SharedPreference.dart';
-import 'chat_page.dart';
+import 'ChatPage.dart';
 
 class LoginScreen extends StatefulWidget {
   final _formKey = GlobalKey<FormState>();
@@ -37,6 +38,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    InternetConnectivity internetConnectivity = new InternetConnectivity(context);
+    internetConnectivity.initializedInternetConnectivity();
     widget.sharedPreference.initializedSharedPreference();
     BlocProvider.of<BlocLoginPage>(context).add(LoginPageLoadedEvent());
   }
