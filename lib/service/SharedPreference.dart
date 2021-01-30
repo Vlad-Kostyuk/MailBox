@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPreference {
-/*
+
   initializedSharedPreference() async {
     SharedPreferences preference = await SharedPreferences.getInstance();
     preference.setBool('userIsLogin', false);
@@ -9,8 +9,6 @@ class SharedPreference {
     preference.setString('userPassword', '');
   }
 
-
- */
   setBoolUserIsLogin(bool userIsLogin) async {
     try {
       SharedPreferences preference = await SharedPreferences.getInstance();

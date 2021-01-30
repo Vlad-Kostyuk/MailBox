@@ -24,7 +24,7 @@ class BlocLoginPage extends Bloc<LoginEvent, LoginState> {
     } catch (e, stacktrace) {
       print(e.toString());
       print(stacktrace.toString());
-      yield LoginPageErrorState();
+      yield LoginPageUserIsLoginState();
     }
   }
 

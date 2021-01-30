@@ -1,9 +1,9 @@
-class User {
+class Users {
   String id;
   String userName;
   String email;
 
-  User({
+  Users({
     this.id,
     this.userName,
     this.email,

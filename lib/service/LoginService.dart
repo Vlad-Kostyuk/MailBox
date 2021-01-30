@@ -6,7 +6,7 @@ import 'SharedPreference.dart';
 class LoginService {
 
   authenticationState() {
-    FirebaseAuth.instance.onAuthStateChanged.listen((event) {
+    FirebaseAuth.instance.authStateChanges().listen((event) {
 
       print(event);
       if (event == null) {
@@ -22,11 +22,11 @@ class LoginService {
 
   signIn(String email, String password) async {
     try {
-      final AuthResult authResult = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
           password: password
       );
-      print(authResult);
+      print(userCredential);
       return true;
     } catch (error) {
       print(error.code);
@@ -36,11 +36,11 @@ class LoginService {
 
   registrationNewUser(String email, String password) async {
     try {
-      final AuthResult authResult = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: email,
           password: password,
       );
-      print(authResult);
+      print(userCredential);
       return true;
     } catch (error) {
       print(error.code);
@@ -51,6 +51,10 @@ class LoginService {
   signingOut() async {
     try {
       await FirebaseAuth.instance.signOut();
+      final SharedPreference sharedPreference = new SharedPreference();
+      sharedPreference.setBoolUserIsLogin(false);
+      sharedPreference.setUserLogin('');
+      sharedPreference.setUserPassword('');
       return true;
     } catch (error) {
       print(error.code);
@@ -58,11 +62,10 @@ class LoginService {
     }
   }
 
-  Future<User> getUser() async {
-    final FirebaseUser firebaseUser = await FirebaseAuth.instance.currentUser();
-    if (firebaseUser != null) {
-      final User user = new User(id: firebaseUser.uid, email: firebaseUser.email, userName: firebaseUser.displayName);
-      return user;
+  Future<Users> getUser() async {
+    if (FirebaseAuth.instance.currentUser != null) {
+      final Users users = new Users(id: FirebaseAuth.instance.currentUser.uid, email: FirebaseAuth.instance.currentUser.email, userName: FirebaseAuth.instance.currentUser.displayName);
+      return users;
     }
   }
 
@@ -78,20 +81,13 @@ class LoginService {
   }
 
   Future<bool> reauthenticatingUser() async {
-    //await userDisconnect();
     final SharedPreference sharedPreference = new SharedPreference();
     if(await sharedPreference.getBoolUserIsLogin()) {
       final String _email = await sharedPreference.getUserLogin();
       final String _password = await sharedPreference.getUserPassword();
 
       try {
-        FirebaseUser user = await FirebaseAuth.instance.currentUser();
-        AuthResult authResult = await user.reauthenticateWithCredential(
-          EmailAuthProvider.getCredential(
-            email: _email,
-            password: _password,
-          ),
-        );
+        await FirebaseAuth.instance.currentUser.reauthenticateWithCredential(EmailAuthProvider.credential(email: _email, password: _password));
         return true;
       } catch(e, stacktrace) {
         print(e.toString());

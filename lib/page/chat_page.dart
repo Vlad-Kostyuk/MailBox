@@ -1,39 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+/*Користувач має пройти етап реєстрації, онбоардінгу і
+потрапити безпосередньо в чат. Розділювати чат на кімнати
+не потрібно. Пуш нотифікації в нотифікейшн бар не обовязкові
+- але якщо хтось реалізує - обіцяю багато додаткових балів*/
+//2
+
+//
 import 'package:flutter/cupertino.dart';
-import 'package:mailbox/service/LoginService.dart';
-import 'loginPage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:animated_icon_button/animated_icon_button.dart';
+import 'package:mailbox/page/registrationPage.dart';
+
 
 
 class ChatScreen extends StatefulWidget {
-  final LoginService loginService = new LoginService();
-
+  // ChatPage({Key key, this.title}) : super(key: key);  тут помилка
+  //final String title;
+  final Function toggleView;
+  ChatScreen({this.toggleView});
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 
-class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
+class _ChatScreenState extends State<ChatScreen>
+    with TickerProviderStateMixin {
   TextEditingController _textController = TextEditingController();
   List<MyMessage> _messages = <MyMessage>[];
   bool _isWriting = false;
+
   Animation<double> _sendButtonAnimation;
   AnimationController _sendButtonAnimationController;
-  String userName = "Serhii Senyk";
 
+  //AnimationController _sendMessageAnimationController;
+
+
+
+  String userName = "Serhii Senyk";
   @override
   void initState() {
     super.initState();
     initSendButtonAnimation();
   }
 
-  @override
-  void dispose() {
-    _sendButtonAnimationController.dispose();
-    for (MyMessage message in _messages) {
-      message.sendMessageAnimationController.dispose();
-    }
-    super.dispose();
-  }
 
   void initSendButtonAnimation(){
     this._sendButtonAnimationController = AnimationController(
@@ -42,12 +53,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     )..repeat(reverse: true);
     this._sendButtonAnimation =
         Tween(begin: 0.9, end: 1.1).animate(
-        CurvedAnimation(
-          parent: _sendButtonAnimationController,
-          curve: Curves.linear,
-        ));
+            CurvedAnimation(
+              parent: _sendButtonAnimationController,
+              curve: Curves.linear,
+            ));
   }
-
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -62,13 +72,20 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           FlatButton.icon(
             icon: Icon(Icons.logout),
             label: Text(''),
+            /*style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'OpenSans',
+                fontWeight: FontWeight.bold,
+              ),*/
+
             onPressed: (){
-              widget.loginService.signingOut();
+              //Navigator.of(context).pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => ChatPage()));
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (context) => LoginScreen()),
+                MaterialPageRoute(builder: (context) => RegistrationScreen()),
                     (Route<dynamic> route) => false,
               );
+              //.then((value) => setState(() => {_forecastBloc.updateForecast()}));
             },
           ),
         ],
@@ -103,7 +120,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
-
   Widget _InputField() {//відповідає за поле відправки повідомлення
     return  IconTheme(
       data:  IconThemeData(color: Theme.of(context).accentColor),
@@ -126,14 +142,20 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                 maxLines : 100,
               ),
             ),
-
-            IconButton(
-              onPressed :
-              _isWriting ? () => _submitMessage(_textController.text.trim(), userName) : null,
-              icon:  Icon(Icons.message_outlined),
-
-            )
-
+            ScaleTransition(
+              scale: _sendButtonAnimation,
+              child: Container(
+                margin:  EdgeInsets.symmetric(horizontal: 3.0),
+                //padding:  EdgeInsets.all(3.0),
+                child:
+                IconButton(
+                  //size: 25,
+                  onPressed :
+                  _isWriting ? () => _submitMessage(_textController.text.trim(), userName) : null,
+                  icon: _isWriting? Icon(Icons.send):Icon(Icons.message_outlined),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -158,6 +180,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     });
     message.sendMessageAnimationController.forward();
   }
+  @override
+  void dispose() {
+    for (MyMessage message in _messages) {
+      message.sendMessageAnimationController.dispose();
+    }
+    //_sendButtonAnimationController.dispose();
+    super.dispose();
+  }
 }
 
 class MyMessage extends StatelessWidget {
@@ -170,8 +200,8 @@ class MyMessage extends StatelessWidget {
   String userName;
   AnimationController sendMessageAnimationController;
   String currentTime = DateTime.now().hour.toString() + ':' +
-                       DateTime.now().minute.toString();
-
+      DateTime.now().minute.toString() ;//+ ':' +
+  //DateTime.now().second.toString();
 
   @override
   Widget build(BuildContext context) {
@@ -181,6 +211,7 @@ class MyMessage extends StatelessWidget {
           parent: sendMessageAnimationController, curve: Curves.elasticOut),
       axisAlignment: 0.0,
       child:  Container(
+        // margin: EdgeInsets.symmetric(vertical: 8.0),
         margin:  EdgeInsets.all(10),
         child:  Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,10 +219,11 @@ class MyMessage extends StatelessWidget {
           children: <Widget>[
 
             Container(
-              margin:  EdgeInsets.only(right: 20.0),//
-              child:
+                margin:  EdgeInsets.only(right: 20.0),//
+                child:
                 CircleAvatar(
-                    child:  Text(userName[0]),
+                  child:  Text(userName[0]),
+                  //backgroundColor: Colors.lightBlue,
                 )
             ),
 
@@ -202,10 +234,10 @@ class MyMessage extends StatelessWidget {
                   Text(
                     userName + ', ' + currentTime,
                     style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.indigo,
-                        fontFamily: 'OpenSans',
-                        fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.indigo,
+                      fontFamily: 'OpenSans',
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
 
@@ -215,8 +247,9 @@ class MyMessage extends StatelessWidget {
                     child: Text(text,
                       style: TextStyle(
                         fontFamily: 'OpenSans',
+                        //fontWeight: FontWeight.bold,
                       ),),
-                     decoration:  BoxDecoration(
+                    decoration:  BoxDecoration(
                       color: Colors.indigo.withOpacity(0.4),
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(5.0),
@@ -234,5 +267,6 @@ class MyMessage extends StatelessWidget {
       ),
     );
   }
-
 }
+
+
