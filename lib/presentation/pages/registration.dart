@@ -4,8 +4,8 @@ import 'package:animated_button/animated_button.dart';
 import 'package:mailbox/core/auth/firabase_auth.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
 
-import 'ChatPage.dart';
-import 'loginPage.dart';
+import 'chat.dart';
+import 'login.dart';
 
 
 class RegistrationScreen extends StatefulWidget {
@@ -224,7 +224,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     this.errorPassword = '';
 
     if(checkLoginIsNull(email, password)) {
-      final LoginService loginService = new LoginService();
+      final FirebaseAuthService loginService = new FirebaseAuthService();
       loginService.registrationNewUser(email.trim(), password.trim());
       saveUserEmailAndPassport();
       Navigator.pushAndRemoveUntil(

@@ -4,15 +4,18 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mailbox/core/auth/firabase_auth.dart';
-import 'package:mailbox/modules/dashboard/bloc/BlocLoginPage.dart';
-import 'package:mailbox/presentation/pages/registrationPage.dart';
-import 'package:mailbox/utils/services/ConnectivityInternet.dart';
+import 'package:mailbox/modules/dashboard/bloc/login/login_bloc.dart';
+import 'package:mailbox/modules/dashboard/bloc/login/login_event.dart';
+import 'package:mailbox/modules/dashboard/bloc/login/login_state.dart';
+
+import 'package:mailbox/presentation/pages/registration.dart';
+import 'package:mailbox/utils/services/connectivity_internet.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
-import 'ChatPage.dart';
+import 'chat.dart';
 
 class LoginScreen extends StatefulWidget {
   final _formKey = GlobalKey<FormState>();
-  final LoginService loginService = new LoginService();
+  final FirebaseAuthService loginService = new FirebaseAuthService();
   final SharedPreference sharedPreference = new SharedPreference();
 
   @override
@@ -41,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
     InternetConnectivity internetConnectivity = new InternetConnectivity(context);
     internetConnectivity.initializedInternetConnectivity();
     widget.sharedPreference.initializedSharedPreference();
-    BlocProvider.of<BlocLoginPage>(context).add(LoginPageLoadedEvent());
+    BlocProvider.of<BlocLogin>(context).add(LoginPageLoadedEvent());
   }
 
   @override
@@ -57,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Color.fromRGBO(236, 241, 247, 1),
       ),
       body: Container(
-        child: BlocBuilder<BlocLoginPage, LoginState>(
+        child: BlocBuilder<BlocLogin, LoginState>(
           builder: (BuildContext context, state) {
 
             print(state);

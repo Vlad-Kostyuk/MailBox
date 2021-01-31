@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mailbox/core/auth/firabase_auth.dart';
+import 'login_event.dart';
+import 'login_state.dart';
 
-class BlocLoginPage extends Bloc<LoginEvent, LoginState> {
-  BlocLoginPage() : super(LoginPageEmptyState());
+class BlocLogin extends Bloc<LoginEvent, LoginState> {
+  BlocLogin() : super(LoginPageEmptyState());
 
   @override
   Stream<LoginState> mapEventToState(LoginEvent event) async* {
@@ -14,7 +16,7 @@ class BlocLoginPage extends Bloc<LoginEvent, LoginState> {
   Stream<LoginState> checkUserIsLogin() async* {
     yield LoginPageLoadingState();
     try {
-      final LoginService loginService = new LoginService();
+      final FirebaseAuthService loginService = new FirebaseAuthService();
       var tmp  = await loginService.reauthenticatingUser();
       if(tmp) {
         yield LoginPageUserIsLoginState();
@@ -27,30 +29,6 @@ class BlocLoginPage extends Bloc<LoginEvent, LoginState> {
       yield LoginPageUserIsLoginState();
     }
   }
-
 }
 
-//--------State--------
 
-abstract class LoginState {}
-
-class LoginPageEmptyState extends LoginState {}
-
-class LoginPageLoadingState extends LoginState {}
-
-class LoginPageUserIsLoginState extends LoginState {}
-
-class LoginPageUserLoadedState extends LoginState {}
-
-class LoginPageErrorState extends LoginState {}
-
-//---------------------
-
-
-//--------Event--------
-
-abstract class LoginEvent {}
-
-class LoginPageLoadedEvent extends LoginEvent {}
-
-//---------------------

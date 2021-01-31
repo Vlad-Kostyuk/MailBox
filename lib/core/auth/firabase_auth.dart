@@ -2,11 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mailbox/modules/dashboard/models/User.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
 
-class LoginService {
+class FirebaseAuthService {
+  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   authenticationState() {
-    FirebaseAuth.instance.authStateChanges().listen((event) {
-
+    _firebaseAuth.authStateChanges().listen((event) {
       print(event);
       if (event == null) {
         print('User is currently signed out!');
@@ -21,7 +21,7 @@ class LoginService {
 
   signIn(String email, String password) async {
     try {
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
           email: email,
           password: password
       );
@@ -35,7 +35,7 @@ class LoginService {
 
   registrationNewUser(String email, String password) async {
     try {
-      final UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      final UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -49,7 +49,7 @@ class LoginService {
 
   signingOut() async {
     try {
-      await FirebaseAuth.instance.signOut();
+      await _firebaseAuth.signOut();
       final SharedPreference sharedPreference = new SharedPreference();
       sharedPreference.setBoolUserIsLogin(false);
       sharedPreference.setUserLogin('');
@@ -62,15 +62,15 @@ class LoginService {
   }
 
   Future<Users> getUser() async {
-    if (FirebaseAuth.instance.currentUser != null) {
-      final Users users = new Users(id: FirebaseAuth.instance.currentUser.uid, email: FirebaseAuth.instance.currentUser.email, userName: FirebaseAuth.instance.currentUser.displayName);
+    if (_firebaseAuth.currentUser != null) {
+      final Users users = new Users(id: _firebaseAuth.currentUser.uid, email: _firebaseAuth.currentUser.email, userName: _firebaseAuth.currentUser.displayName);
       return users;
     }
   }
 
   Future<bool> userDisconnect() async {
     try {
-      await FirebaseAuth.instance.signOut();
+      await _firebaseAuth.signOut();
       return true;
     } catch(e, stacktrace) {
       print(e.toString());
