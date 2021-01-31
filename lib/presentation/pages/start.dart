@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mailbox/modules/dashboard/bloc/login/login_bloc.dart';
 import 'package:mailbox/utils/services/connectivity_internet.dart';
-
 import 'login.dart';
 
 class StartPage extends StatefulWidget {
@@ -32,7 +31,7 @@ class _StartPageState extends State<StartPage> {
         builder: (context, snapshot) {
 
           if (snapshot.hasError) {
-            return Container();
+            return LoginScreen();
           }
 
           if (snapshot.connectionState == ConnectionState.done) {
@@ -48,21 +47,7 @@ class _StartPageState extends State<StartPage> {
             );
           }
 
-          return Scaffold(
-              body: Container(
-                color: Color.fromRGBO(236, 241, 247, 1),
-                child: Stack(
-                  children: [
-
-                    Center(
-                      child: CircularProgressIndicator(),
-                    )
-
-                  ],
-                ),
-              ),
-          );
-
+          return Container();
         },
       ),
     );

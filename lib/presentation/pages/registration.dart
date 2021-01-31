@@ -19,6 +19,7 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  String errorName = '';
   String errorEmail = '';
   String errorPassword = '';
   String email = '';
@@ -96,6 +97,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
 
+                    this.errorName.isNotEmpty ? Text(this.errorName, style: TextStyle(color: Colors.red)) : Container(),
+
                     SizedBox(height: 10.0),
                     Container(
                       height: 60.0,
@@ -167,7 +170,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
 
                         onPressed: () {
-                          validatedLogin(email, password);
+                          validatedLogin(email, password, userName);
                         },
                           duration: 100,
                           height: 54,
@@ -219,11 +222,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   }
 
-  validatedLogin(String email, String password) async {
+  validatedLogin(String email, String password, String userName) async {
+    this.errorName = '';
     this.errorEmail = '';
     this.errorPassword = '';
 
-    if(checkLoginIsNull(email, password)) {
+    if(checkLoginIsNull(email, password, userName)) {
       final FirebaseAuthService loginService = new FirebaseAuthService();
       loginService.registrationNewUser(email.trim(), password.trim());
       saveUserEmailAndPassport();
@@ -275,25 +279,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  bool checkLoginIsNull(String email, String password) {
-    if(password == null  && email == null) {
+  bool checkLoginIsNull(String email, String password, String userName) {
+    if(password == null  && email == null && userName == null) {
       setState(() {
+        this.errorName = 'Pls write you Name!';
         this.errorEmail = 'Pls write you email!';
         this.errorPassword = 'Pls write you password!';
       });
       return false;
     }
 
-    if(password == null && email != null) {
+    if(password == null && email != null && userName != null) {
       setState(() {
+        this.errorName = '';
         this.errorEmail = '';
         this.errorPassword = 'Pls write you password!';
       });
       return false;
     }
 
-    if(email == null && password != null) {
+    if(email == null && password != null && userName != null) {
       setState(() {
+        this.errorName = '';
         this.errorEmail = 'Pls write you email!';
         this.errorPassword = '';
       });
@@ -304,24 +311,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   bool checkLoginIsNotEmpty(String email, String password) {
-    if(password.isEmpty  && email.isEmpty) {
+    if(password.isEmpty  && email.isEmpty && userName.isEmpty) {
       setState(() {
+        this.errorName = 'Pls write you Name!';
         this.errorEmail = 'Pls write you email!';
         this.errorPassword = 'Pls write you password!';
       });
       return false;
     }
 
-    if(password.isEmpty && email.isNotEmpty) {
+    if(password.isEmpty && email.isNotEmpty && userName.isNotEmpty) {
       setState(() {
+        this.errorName = '';
         this.errorEmail = '';
         this.errorPassword = 'Pls write you password!';
       });
       return false;
     }
 
-    if(email.isEmpty && password.isNotEmpty) {
+    if(email.isEmpty && password.isNotEmpty && userName.isNotEmpty) {
       setState(() {
+        this.errorName = '';
         this.errorEmail = 'Pls write you email!';
         this.errorPassword = '';
       });
