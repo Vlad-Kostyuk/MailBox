@@ -1,8 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:mailbox/model/User.dart';
-
-import 'SharedPreference.dart';
+import 'package:mailbox/modules/dashboard/models/User.dart';
+import 'package:mailbox/utils/services/local_storage_serice.dart';
 
 class LoginService {
 
@@ -38,8 +36,8 @@ class LoginService {
   registrationNewUser(String email, String password) async {
     try {
       final UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
+        email: email,
+        password: password,
       );
       print(userCredential);
       return true;
@@ -85,7 +83,7 @@ class LoginService {
 
   Future<bool> reauthenticatingUser() async {
     final SharedPreference sharedPreference = new SharedPreference();
-     bool tmp = await sharedPreference.getBoolUserIsLogin();
+    bool tmp = await sharedPreference.getBoolUserIsLogin();
     if(tmp) {
       final String _email = await sharedPreference.getUserLogin();
       final String _password = await sharedPreference.getUserPassword();

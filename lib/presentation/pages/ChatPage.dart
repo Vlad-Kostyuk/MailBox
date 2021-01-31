@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:mailbox/page/startPage.dart';
-import 'package:mailbox/service/ConnectivityInternet.dart';
-import 'package:mailbox/service/FirebaseDaraStore.dart';
-
+import 'package:mailbox/utils/services/ConnectivityInternet.dart';
+import 'package:mailbox/utils/services/FirebaseDaraStore.dart';
 import 'loginPage.dart';
 
 class ChatScreen extends StatefulWidget {

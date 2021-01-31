@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mailbox/service/LoginService.dart';
+import 'package:mailbox/core/auth/firabase_auth.dart';
 
 class BlocLoginPage extends Bloc<LoginEvent, LoginState> {
   BlocLoginPage() : super(LoginPageEmptyState());
