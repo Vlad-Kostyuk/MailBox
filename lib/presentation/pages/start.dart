@@ -24,7 +24,7 @@ class _StartPageState extends State<StartPage> {
     InternetConnectivity internetConnectivity = new InternetConnectivity(context);
     internetConnectivity.initializedInternetConnectivity();
     Firebase.initializeApp().whenComplete(() {
-      print("completed");
+      print("Completed");
       setState(() {});
       //widget.firebaseAuthService.authenticationState();
     });
