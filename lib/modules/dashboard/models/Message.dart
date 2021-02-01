@@ -13,11 +13,12 @@ class Message {
         text = snapshot.value["text"],
         datetime = snapshot.value["datetime"],
         username = snapshot.value["username"];
-
-/*toJson() {
-    return {
-      "title": title,
-      "body": body,
+  //don`t works
+  Map<String, dynamic> toJson() =>
+    {
+      'username': username,
+      'datetime': datetime,
+      'text' : text,
     };
-  }*/
+
 }

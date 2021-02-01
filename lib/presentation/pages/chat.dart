@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:mailbox/modules/dashboard/models/Message.dart';
 import 'package:mailbox/utils/services/connectivity_internet.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
-
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
@@ -25,11 +25,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Animation<double> _sendButtonAnimation;
   AnimationController _sendButtonAnimationController;
   String userName = " ";
+  String test = " ";
   DatabaseReference messageRef;
-  List<Message> messages = List();
   Message message;
   final SharedPreference sharedPreference = new SharedPreference();
-  //ScrollController _scrollController = new ScrollController();
+  ScrollController _controller = new ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -37,19 +38,27 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     message = Message("","","");
     final FirebaseDatabase database = FirebaseDatabase.instance;
     messageRef = database.reference().child("messages");
-    messageRef.onChildAdded.listen(_onEntryAdded);
-    //itemRef.onChildChanged.listen(_onEntryChanged);
+    messageRef.onChildAdded.listen(_onEntry);
+    //_scrollController = new ScrollController();
+    //_scrollController.addListener(_scrollListener);
+    //messageRef.onChildChanged.listen(_onEntryChanged);
+    _controller = ScrollController();
   }
 
-  _onEntryAdded(Event event) {
+  _onEntry(Event event) {
     setState(() {
-      messages.add(Message.fromSnapshot(event.snapshot));
+      _controller.animateTo(
+          _controller.position.maxScrollExtent,
+          curve: Curves.easeOut,
+          duration:  Duration(milliseconds: 500)
+      );
     });
   }
 
   @override
   void dispose() {
     _sendButtonAnimationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -97,7 +106,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
          child: Column(children: [
           Flexible(
             child: FirebaseAnimatedList(
-              //controller: _controller,
+              controller: _controller,
 
 
               query: messageRef,
@@ -106,6 +115,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
               itemBuilder: (BuildContext context, DataSnapshot snapshot,
                   Animation<double> animation, int index){
+                    message = Message.fromSnapshot(snapshot);
                     return Container(
                       margin:  EdgeInsets.all(10),
                       child:  Row(
@@ -115,16 +125,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                               margin:EdgeInsets.only(right: 20.0),//
                               child:
                               CircleAvatar(
-                                child:  Text(messages[index].username[0]),
+                                child:  Text(message.username[0]),
                               )
                           ),
                           Flexible(
                             child:  Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                Text(
-                                  messages[index].username + ', '
-                                      + messages[index].datetime,
+                                Text(message.username + ','
+                                    + message.datetime,
+                                  //messages[index].username + ', '+
+                                   //   messages[index].datetime,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.indigo,
@@ -136,7 +147,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                 Container(
                                   margin: EdgeInsets.only(top: 6.0),
                                   padding: EdgeInsets.all(10.0),
-                                  child: Text(messages[index].text,
+                                  child: Text(message.text,
                                     style: TextStyle(
                                       fontFamily: 'OpenSans',
                                       //fontWeight: FontWeight.bold,
@@ -188,7 +199,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               child:  TextField(
                 controller: _textController,
                 decoration:
-                InputDecoration.collapsed(hintText: "Write a message..."),
+                InputDecoration.collapsed(hintText: "Write a message..." + test),
                 onChanged: (String messageText) {
                   setState(() {
                     RegExp regExp = new RegExp(r"(\S+)");
@@ -221,23 +232,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
    Future<void> _submitMessage(String text, String userName) async {
 
-
     String username = await sharedPreference.getUserName();
+    String datetime = DateFormat('HH:mm  dd.MM.yy').format(DateTime.now()).toString();
     if(username == '')
        username = "default";
     messageRef
         .push()
-        //.child("message")
         .set({
       'username': username,
-      'datetime' : DateTime.now().toString(),
-      'text' : text.toString()
+      'datetime' : datetime,
+      'text' : text
     });
-
-    /* ref.child("fl").set({
-      'name': 'Test',
-      'description': 'Team Lead'
-    });*/
     _textController.clear();
     setState(() {
       _isWriting = false;

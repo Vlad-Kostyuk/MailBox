@@ -282,8 +282,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool checkLoginIsNull(String email, String password) {
     if(password == null  && email == null) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = 'Pls write you password!';
+        this.errorEmail = 'Please write your email!';
+        this.errorPassword = 'Please write your password!';
       });
       return false;
     }
@@ -291,14 +291,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if(password == null && email != null) {
       setState(() {
         this.errorEmail = '';
-        this.errorPassword = 'Pls write you password!';
+        this.errorPassword = 'Please write your password!';
       });
       return false;
     }
 
     if(email == null && password != null) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
+        this.errorEmail = 'Please write your email!';
         this.errorPassword = '';
       });
       return false;
@@ -310,8 +310,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   bool checkLoginIsNotEmpty(String email, String password) {
     if(password.isEmpty  && email.isEmpty) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = 'Pls write you password!';
+        this.errorEmail = 'Please write your email!';
+        this.errorPassword = 'Please write your password!';
       });
       return false;
     }
@@ -319,14 +319,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if(password.isEmpty && email.isNotEmpty) {
       setState(() {
         this.errorEmail = '';
-        this.errorPassword = 'Pls write you password!';
+        this.errorPassword = 'Please write your password!';
       });
       return false;
     }
 
     if(email.isEmpty && password.isNotEmpty) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
+        this.errorEmail = 'Please write your email!';
         this.errorPassword = '';
       });
       return false;
