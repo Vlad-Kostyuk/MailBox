@@ -43,14 +43,17 @@ class FirebaseDbServices {
     final FirebaseAuthService registrationScreen = new FirebaseAuthService();
     final Users users = await registrationScreen.getUser();
     try {
-      if(users.userName.isNotEmpty) {
+      //if(users.userName.isNotEmpty) {
+      String user = users.userName;
+      if(users.userName.isEmpty) {
+        user = "unregistered";
+      }
         messageRef.push().set({
-          'username': users.userName,
+          'username': user,
           'datetime': DateFormat('hh:mm').format(DateTime.now()).toString(),
           'text': text
         });
-
-      }
+      //}
       return true;
     } catch(error) {
       print(error);

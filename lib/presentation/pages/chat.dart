@@ -6,12 +6,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:mailbox/modules/dashboard/models/Message.dart';
 import 'package:mailbox/utils/services/connectivity_internet.dart';
 import 'package:mailbox/utils/services/fiebase_db_services.dart';
-
-
 import 'login.dart';
+import 'package:mailbox/core/auth/firabase_auth.dart';
+import 'package:mailbox/modules/dashboard/models/User.dart';
 
 class ChatScreen extends StatefulWidget {
   final FirebaseDbServices firebaseDbServices = new FirebaseDbServices();
+  final FirebaseDatabase database = FirebaseDatabase.instance;
+  final FirebaseAuthService registrationScreen = new FirebaseAuthService();
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -22,25 +24,26 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool _isWriting = false;
   Animation<double> _sendButtonAnimation;
   AnimationController _sendButtonAnimationController;
-  String userName = " ";
-  String test = " ";
   DatabaseReference messageRef;
   Message message;
-  //final SharedPreference sharedPreference = new SharedPreference();
+  Users users;
   ScrollController _controller = new ScrollController();
+
 
   @override
   void initState() {
     super.initState();
     initSendButtonAnimation();
-    message = Message("","","");
-    final FirebaseDatabase database = FirebaseDatabase.instance;
-    messageRef = database.reference().child("messages");
+    messageRef = widget.database.reference().child("messages");
     messageRef.onChildAdded.listen(_onEntry);
-    //_scrollController = new ScrollController();
-    //_scrollController.addListener(_scrollListener);
-    //messageRef.onChildChanged.listen(_onEntryChanged);
+    getUser();
+    widget.registrationScreen.authenticationState();
     _controller = ScrollController();
+
+  }
+
+  void getUser() async{
+    users = await widget.registrationScreen.getUser();
   }
 
   _onEntry(Event event) {
@@ -55,8 +58,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _sendButtonAnimationController.dispose();
     _controller.dispose();
+    _sendButtonAnimationController.dispose();
     super.dispose();
   }
 
@@ -85,13 +88,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             icon: Icon(Icons.logout),
             label: Text(''),
             onPressed: (){
-              Navigator.of(context).pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => LoginScreen()));
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+                    (Route<dynamic> route) => false,
+              );
             },
           ),
         ],
         iconTheme:  IconThemeData(color: Colors.black),
         centerTitle: true,
-        backgroundColor: Color.fromRGBO(236, 241, 247, 1),//elevation: 6.0,
+        backgroundColor: Color.fromRGBO(236, 241, 247, 1),
       ),
       body:  Container(
         decoration: BoxDecoration(
@@ -105,7 +112,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           Flexible(
             child: FirebaseAnimatedList(
               controller: _controller,
-
 
               query: messageRef,
               // shrinkWrap: true,
@@ -130,9 +136,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                         child:  Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(message.username + ', '
+                            Text(message.username + ','
                                 + message.datetime,
-
+                              //messages[index].username + ', '+
+                              //   messages[index].datetime,
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.indigo,
@@ -180,7 +187,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           ),
         ]),
       ),
-
       backgroundColor: Color.fromRGBO(236, 241, 247, 1),
     );
   }
@@ -196,7 +202,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               child:  TextField(
                 controller: _textController,
                 decoration:
-                InputDecoration.collapsed(hintText: "Write a message..." + test),
+                InputDecoration.collapsed(hintText: "Write a message..."),
                 onChanged: (String messageText) {
                   setState(() {
                     RegExp regExp = new RegExp(r"(\S+)");
@@ -211,11 +217,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               scale: _sendButtonAnimation,
               child: Container(
                 margin:  EdgeInsets.symmetric(horizontal: 3.0),
-                child:
-                //відправляє користувача за замовчуванням
-                IconButton(
-                  onPressed :
-                  _isWriting ? () => _submitMessage(_textController.text.trim()) : null,
+                child: IconButton(onPressed :
+                _isWriting ? () => _submitMessage(_textController.text.trim()) : null,
                   icon: _isWriting? Icon(Icons.send):Icon(Icons.message_outlined),
                 ),
               ),
@@ -227,25 +230,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
 
-  /*Future<void> _submitMessage(String text) async {
-
-    String username = await sharedPreference.getUserName();
-    String datetime = DateFormat('HH:mm  dd.MM.yy').format(DateTime.now()).toString();
-    if(username == '')
-      username = "default";
-    messageRef
-        .push()
-        .set({
-      'username': username,
-      'datetime' : datetime,
-      'text' : text
-    });
-    _textController.clear();
-    setState(() {
-      _isWriting = false;
-    });
-  }*/
-
   void _submitMessage(String text) async {
     final bool result = await widget.firebaseDbServices.sendMessage(text);
     if(result) {
@@ -255,5 +239,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       });
     }
   }
-
 }
+
+
