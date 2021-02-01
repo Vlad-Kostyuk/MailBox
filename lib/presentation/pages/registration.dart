@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:animated_button/animated_button.dart';
 import 'package:mailbox/core/auth/firabase_auth.dart';
-import 'package:mailbox/presentation/pages/chat.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
-
+import 'chat.dart';
 import 'login.dart';
-//Serhii Senyk, 30.01.2021
-//проходить реєстрацію , автентифікацію, але не зберігає ім'я
+
 
 class RegistrationScreen extends StatefulWidget {
   RegistrationScreen({this.toggleView});
@@ -20,6 +18,7 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  String errorName = '';
   String errorEmail = '';
   String errorPassword = '';
   String email = '';
@@ -89,13 +88,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           fontFamily: 'OpenSans',
                         ),
                         decoration: const InputDecoration(
-                            labelText: 'First Name',
-                            labelStyle: TextStyle(
+                          labelText: 'First Name',
+                          labelStyle: TextStyle(
                             color: Colors.black,
                           ),
                         ),
                       ),
                     ),
+
+                    this.errorName.isNotEmpty ? Text(this.errorName, style: TextStyle(color: Colors.red)) : Container(),
 
                     SizedBox(height: 10.0),
                     Container(
@@ -168,15 +169,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
 
                         onPressed: () {
-                          validatedLogin(email, password);
+                          validatedLogin(email, password, userName);
                         },
-                          duration: 100,
-                          height: 54,
-                          width: 220,
-                          shadowDegree: ShadowDegree.dark,
-                          color: Colors.indigo,
-                        ),
+                        duration: 100,
+                        height: 54,
+                        width: 220,
+                        shadowDegree: ShadowDegree.dark,
+                        color: Colors.indigo,
                       ),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -220,31 +221,27 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   }
 
-  validatedLogin(String email, String password) async {
+  validatedLogin(String email, String password, String userName) async {
+    this.errorName = '';
     this.errorEmail = '';
     this.errorPassword = '';
 
-    if(checkLoginIsNull(email, password)) {
-      final LoginService loginService = new LoginService();
+    if(checkLoginIsNull(email, password, userName)) {
+      final FirebaseAuthService loginService = new FirebaseAuthService();
       loginService.registrationNewUser(email.trim(), password.trim(), userName.trim());
-      saveUserEmailAndPassword();
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => ChatScreen()),
+      saveUserEmailAndPassport();
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ChatScreen()),
             (Route<dynamic> route) => false,
       );
     }
   }
 
-  void saveUserEmailAndPassword() {
+  void saveUserEmailAndPassport() {
     widget.sharedPreference.setBoolUserIsLogin(true);
     widget.sharedPreference.setUserLogin(email);
     widget.sharedPreference.setUserPassword(password);
-    widget.sharedPreference.setUserName(userName);
   }
 
-
-  //некоректно спрацювало коли немає такого користувача
   void validatedErrorCode(var resultLoginService) {
     switch (resultLoginService) {
       case "ERROR_INVALID_EMAIL":
@@ -279,28 +276,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  bool checkLoginIsNull(String email, String password) {
-    if(password == null  && email == null) {
+  bool checkLoginIsNull(String email, String password, String userName) {
+    if(userName == null) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = 'Pls write you password!';
+        this.errorName = 'Pls write you Name!';
       });
-      return false;
     }
 
-    if(password == null && email != null) {
-      setState(() {
-        this.errorEmail = '';
-        this.errorPassword = 'Pls write you password!';
-      });
-      return false;
-    }
-
-    if(email == null && password != null) {
+    if(email == null) {
       setState(() {
         this.errorEmail = 'Pls write you email!';
-        this.errorPassword = '';
       });
+    }
+
+    if(password == null) {
+      setState(() {
+        this.errorPassword = 'Pls write you password!';
+      });
+    }
+
+    if(password == null || email == null || userName == null) {
       return false;
     } else {
       return checkLoginIsNotEmpty(email, password);
@@ -308,30 +303,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   bool checkLoginIsNotEmpty(String email, String password) {
-    if(password.isEmpty  && email.isEmpty) {
+    if(userName.isEmpty) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = 'Pls write you password!';
+        this.errorName = 'Pls write you Name!';
       });
-      return false;
     }
 
-    if(password.isEmpty && email.isNotEmpty) {
-      setState(() {
-        this.errorEmail = '';
-        this.errorPassword = 'Pls write you password!';
-      });
-      return false;
-    }
-
-    if(email.isEmpty && password.isNotEmpty) {
+    if(email.isEmpty) {
       setState(() {
         this.errorEmail = 'Pls write you email!';
-        this.errorPassword = '';
       });
+    }
+
+    if(password.isEmpty) {
+      setState(() {
+        this.errorPassword = 'Pls write you password!';
+      });
+    }
+
+    if(password.isEmpty || email.isEmpty || userName.isEmpty) {
       return false;
     } else {
       return true;
     }
   }
 }
+
+

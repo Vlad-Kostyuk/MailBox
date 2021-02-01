@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mailbox/modules/dashboard/models/User.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
 
-class LoginService {
+class FirebaseAuthService {
   final SharedPreference sharedPreference = new SharedPreference();
   authenticationState() {
     FirebaseAuth.instance.authStateChanges().listen((event) {

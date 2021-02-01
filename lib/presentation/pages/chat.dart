@@ -1,19 +1,17 @@
 //import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mailbox/modules/dashboard/models/Message.dart';
 import 'package:mailbox/utils/services/connectivity_internet.dart';
-import 'package:mailbox/utils/services/local_storage_serice.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
+import 'package:mailbox/utils/services/fiebase_db_services.dart';
+
 
 import 'login.dart';
 
 class ChatScreen extends StatefulWidget {
+  final FirebaseDbServices firebaseDbServices = new FirebaseDbServices();
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -28,7 +26,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   String test = " ";
   DatabaseReference messageRef;
   Message message;
-  final SharedPreference sharedPreference = new SharedPreference();
+  //final SharedPreference sharedPreference = new SharedPreference();
   ScrollController _controller = new ScrollController();
 
   @override
@@ -132,10 +130,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                         child:  Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(message.username + ','
+                            Text(message.username + ', '
                                 + message.datetime,
-                              //messages[index].username + ', '+
-                              //   messages[index].datetime,
+
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.indigo,
@@ -218,7 +215,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                 //відправляє користувача за замовчуванням
                 IconButton(
                   onPressed :
-                  _isWriting ? () => _submitMessage(_textController.text.trim(), userName) : null,
+                  _isWriting ? () => _submitMessage(_textController.text.trim()) : null,
                   icon: _isWriting? Icon(Icons.send):Icon(Icons.message_outlined),
                 ),
               ),
@@ -230,7 +227,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
 
-  Future<void> _submitMessage(String text, String userName) async {
+  /*Future<void> _submitMessage(String text) async {
 
     String username = await sharedPreference.getUserName();
     String datetime = DateFormat('HH:mm  dd.MM.yy').format(DateTime.now()).toString();
@@ -247,5 +244,16 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     setState(() {
       _isWriting = false;
     });
+  }*/
+
+  void _submitMessage(String text) async {
+    final bool result = await widget.firebaseDbServices.sendMessage(text);
+    if(result) {
+      _textController.clear();
+      setState(() {
+        _isWriting = false;
+      });
+    }
   }
+
 }
