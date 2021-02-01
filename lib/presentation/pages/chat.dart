@@ -26,6 +26,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   DatabaseReference messageRef;
   List<Message> messages = List();
   Users users;
+  ScrollController _controller = new ScrollController();
+
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     });
     getUser();
     widget.registrationScreen.authenticationState();
+    _controller = ScrollController();
   }
 
   void getUser() async{
@@ -45,6 +48,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _controller.dispose();
     _sendButtonAnimationController.dispose();
     super.dispose();
   }
@@ -97,6 +101,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
          child: Column(children: [
           Flexible(
             child: FirebaseAnimatedList(
+              controller: _controller,
               query: messageRef,
               itemBuilder: (BuildContext context, DataSnapshot snapshot, Animation<double> animation, int index) {
                     return Container(
