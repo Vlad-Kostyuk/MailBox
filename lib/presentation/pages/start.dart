@@ -20,25 +20,50 @@ class _StartPageState extends State<StartPage> {
     super.initState();
     InternetConnectivity internetConnectivity = new InternetConnectivity(context);
     internetConnectivity.initializedInternetConnectivity();
-    Firebase.initializeApp().whenComplete(() {
-      print("completed");
-      setState(() {});
-    });
+    Firebase.initializeApp();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: FutureBuilder(
+        future: Firebase.initializeApp(),
+        builder: (context, snapshot) {
 
-        BlocProvider<BlocLogin>(
-          create: (context) => BlocLogin(),
-        ),
+          if (snapshot.hasError) {
+            return Container();
+          }
 
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: LoginScreen(),
+          if (snapshot.connectionState == ConnectionState.done) {
+            return MultiBlocProvider(
+              providers: [
+
+                BlocProvider<BlocLogin>(
+                  create: (context) => BlocLogin(),
+                ),
+
+              ],
+              child: LoginScreen(),
+            );
+          }
+
+          return Scaffold(
+              body: Container(
+                color: Color.fromRGBO(236, 241, 247, 1),
+                child: Stack(
+                  children: [
+
+                    Center(
+                      child: CircularProgressIndicator(),
+                    )
+
+                  ],
+                ),
+              ),
+          );
+
+        },
       ),
     );
   }

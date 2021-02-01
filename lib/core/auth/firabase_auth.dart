@@ -2,11 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mailbox/modules/dashboard/models/User.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
 
-class LoginService {
-  final SharedPreference sharedPreference = new SharedPreference();
-  authenticationState() {
-    FirebaseAuth.instance.authStateChanges().listen((event) {
+class FirebaseAuthService {
+  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+  authenticationState() {
+    _firebaseAuth.authStateChanges().listen((event) {
       print(event);
       if (event == null) {
         print('User is currently signed out!');
@@ -21,15 +21,10 @@ class LoginService {
 
   signIn(String email, String password) async {
     try {
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
           email: email,
           password: password
       );
-      String userName = await userCredential.user.displayName;
-      if(userName.isEmpty)
-        userName = "userName";
-
-      sharedPreference.setUserName(userName);
       print(userCredential);
       return true;
     } catch (error) {
@@ -38,13 +33,12 @@ class LoginService {
     }
   }
 
- //тут виправлено додано Profile
-  registrationNewUser(String email, String password, String username) async {
-    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  registrationNewUser(String email, String password) async {
     try {
-      final userCredential =
-            await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
-      await userCredential.user.updateProfile(displayName: username);
+      final UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       print(userCredential);
       return true;
     } catch (error) {
@@ -55,7 +49,7 @@ class LoginService {
 
   signingOut() async {
     try {
-      await FirebaseAuth.instance.signOut();
+      await _firebaseAuth.signOut();
       final SharedPreference sharedPreference = new SharedPreference();
       sharedPreference.setBoolUserIsLogin(false);
       sharedPreference.setUserLogin('');
@@ -68,15 +62,15 @@ class LoginService {
   }
 
   Future<Users> getUser() async {
-    if (FirebaseAuth.instance.currentUser != null) {
-      final Users users = new Users(id: FirebaseAuth.instance.currentUser.uid, email: FirebaseAuth.instance.currentUser.email, userName: FirebaseAuth.instance.currentUser.displayName);
+    if (_firebaseAuth.currentUser != null) {
+      final Users users = new Users(id: _firebaseAuth.currentUser.uid, email: _firebaseAuth.currentUser.email, userName: _firebaseAuth.currentUser.displayName);
       return users;
     }
   }
 
   Future<bool> userDisconnect() async {
     try {
-      await FirebaseAuth.instance.signOut();
+      await _firebaseAuth.signOut();
       return true;
     } catch(e, stacktrace) {
       print(e.toString());
@@ -89,7 +83,7 @@ class LoginService {
 
   Future<bool> reauthenticatingUser() async {
     final SharedPreference sharedPreference = new SharedPreference();
-     bool tmp = await sharedPreference.getBoolUserIsLogin();
+    bool tmp = await sharedPreference.getBoolUserIsLogin();
     if(tmp) {
       final String _email = await sharedPreference.getUserLogin();
       final String _password = await sharedPreference.getUserPassword();

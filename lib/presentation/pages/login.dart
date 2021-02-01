@@ -7,15 +7,15 @@ import 'package:mailbox/core/auth/firabase_auth.dart';
 import 'package:mailbox/modules/dashboard/bloc/login/login_bloc.dart';
 import 'package:mailbox/modules/dashboard/bloc/login/login_event.dart';
 import 'package:mailbox/modules/dashboard/bloc/login/login_state.dart';
-import 'package:mailbox/presentation/pages/chat.dart';
+
 import 'package:mailbox/presentation/pages/registration.dart';
 import 'package:mailbox/utils/services/connectivity_internet.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
-
+import 'chat.dart';
 
 class LoginScreen extends StatefulWidget {
   final _formKey = GlobalKey<FormState>();
-  final LoginService loginService = new LoginService();
+  final FirebaseAuthService loginService = new FirebaseAuthService();
   final SharedPreference sharedPreference = new SharedPreference();
 
   @override
@@ -435,3 +435,5 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 }
+
+

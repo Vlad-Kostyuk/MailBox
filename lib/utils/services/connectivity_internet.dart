@@ -3,6 +3,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mailbox/widget/alert_dialog.dart';
 
+
 class InternetConnectivity {
   BuildContext context;
 
