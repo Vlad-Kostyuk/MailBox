@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:animated_button/animated_button.dart';
 import 'package:mailbox/core/auth/firabase_auth.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
-
 import 'chat.dart';
 import 'login.dart';
 
@@ -229,11 +228,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     if(checkLoginIsNull(email, password, userName)) {
       final FirebaseAuthService loginService = new FirebaseAuthService();
-      loginService.registrationNewUser(email.trim(), password.trim());
+      loginService.registrationNewUser(email.trim(), password.trim(), userName.trim());
       saveUserEmailAndPassport();
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => ChatScreen()),
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ChatScreen()),
             (Route<dynamic> route) => false,
       );
     }
@@ -280,30 +277,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   bool checkLoginIsNull(String email, String password, String userName) {
-    if(password == null  && email == null && userName == null) {
+    if(userName == null) {
       setState(() {
         this.errorName = 'Pls write you Name!';
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = 'Pls write you password!';
       });
-      return false;
     }
 
-    if(password == null && email != null && userName != null) {
+    if(email == null) {
       setState(() {
-        this.errorName = '';
-        this.errorEmail = '';
-        this.errorPassword = 'Pls write you password!';
+        this.errorEmail = 'Pls write you email!';
       });
-      return false;
     }
 
-    if(email == null && password != null && userName != null) {
+    if(password == null) {
       setState(() {
-        this.errorName = '';
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = '';
+        this.errorPassword = 'Pls write you password!';
       });
+    }
+
+    if(password == null || email == null || userName == null) {
       return false;
     } else {
       return checkLoginIsNotEmpty(email, password);
@@ -311,30 +303,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   bool checkLoginIsNotEmpty(String email, String password) {
-    if(password.isEmpty  && email.isEmpty && userName.isEmpty) {
+    if(userName.isEmpty) {
       setState(() {
         this.errorName = 'Pls write you Name!';
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = 'Pls write you password!';
       });
-      return false;
     }
 
-    if(password.isEmpty && email.isNotEmpty && userName.isNotEmpty) {
+    if(email.isEmpty) {
       setState(() {
-        this.errorName = '';
-        this.errorEmail = '';
-        this.errorPassword = 'Pls write you password!';
+        this.errorEmail = 'Pls write you email!';
       });
-      return false;
     }
 
-    if(email.isEmpty && password.isNotEmpty && userName.isNotEmpty) {
+    if(password.isEmpty) {
       setState(() {
-        this.errorName = '';
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = '';
+        this.errorPassword = 'Pls write you password!';
       });
+    }
+
+    if(password.isEmpty || email.isEmpty || userName.isEmpty) {
       return false;
     } else {
       return true;

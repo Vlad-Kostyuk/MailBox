@@ -1,4 +1,5 @@
 import 'package:animated_button/animated_button.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -11,11 +12,12 @@ import 'package:mailbox/presentation/pages/chat.dart';
 import 'package:mailbox/presentation/pages/registration.dart';
 import 'package:mailbox/utils/services/connectivity_internet.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class LoginScreen extends StatefulWidget {
   final _formKey = GlobalKey<FormState>();
-  final LoginService loginService = new LoginService();
+  final FirebaseAuthService loginService = new FirebaseAuthService();
   final SharedPreference sharedPreference = new SharedPreference();
 
   @override
@@ -39,12 +41,19 @@ class _LoginScreenState extends State<LoginScreen> {
   });
 
   @override
-  void initState() {
+  initState() {
     super.initState();
     InternetConnectivity internetConnectivity = new InternetConnectivity(context);
     internetConnectivity.initializedInternetConnectivity();
-    widget.sharedPreference.initializedSharedPreference();
     BlocProvider.of<BlocLogin>(context).add(LoginPageLoadedEvent());
+    checkUserIsLoginNoeNull();
+  }
+
+  checkUserIsLoginNoeNull() async {
+    SharedPreferences preference = await SharedPreferences.getInstance();
+    print(preference.containsKey('userIsLogin'));
+    if(!preference.containsKey('userIsLogin'))
+      widget.sharedPreference.initializedSharedPreference();
   }
 
   @override
@@ -62,8 +71,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         child: BlocBuilder<BlocLogin, LoginState>(
           builder: (BuildContext context, state) {
-
-            print(state);
 
             if(state is LoginPageLoadingState) {
                return Container(
