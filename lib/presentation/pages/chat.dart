@@ -1,8 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_database/ui/firebase_animated_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mailbox/modules/dashboard/models/Message.dart';
 import 'package:mailbox/utils/services/connectivity_internet.dart';
-import 'package:mailbox/utils/services/firebase_dara_store.dart';
+import 'package:mailbox/utils/services/local_storage_serice.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+
 import 'login.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -16,18 +24,41 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool _isWriting = false;
   Animation<double> _sendButtonAnimation;
   AnimationController _sendButtonAnimationController;
-  String userName = "Serhii Senyk";
-
+  String userName = " ";
+  String test = " ";
+  DatabaseReference messageRef;
+  Message message;
+  final SharedPreference sharedPreference = new SharedPreference();
+  ScrollController _controller = new ScrollController();
 
   @override
   void initState() {
     super.initState();
     initSendButtonAnimation();
+    message = Message("","","");
+    final FirebaseDatabase database = FirebaseDatabase.instance;
+    messageRef = database.reference().child("messages");
+    messageRef.onChildAdded.listen(_onEntry);
+    //_scrollController = new ScrollController();
+    //_scrollController.addListener(_scrollListener);
+    //messageRef.onChildChanged.listen(_onEntryChanged);
+    _controller = ScrollController();
+  }
+
+  _onEntry(Event event) {
+    setState(() {
+      _controller.animateTo(
+          _controller.position.maxScrollExtent,
+          curve: Curves.easeOut,
+          duration:  Duration(milliseconds: 500)
+      );
+    });
   }
 
   @override
   void dispose() {
     _sendButtonAnimationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -72,77 +103,87 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             fit: BoxFit.fitWidth,
           ),
         ),
-        child: Column(children: <Widget>[
+        child: Column(children: [
           Flexible(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('chatRoom').orderBy('date', descending: false).snapshots(includeMetadataChanges: true),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                  return new ListView.builder(
-                    itemCount: snapshot.data.docs.length,
-                    itemBuilder: (context, index) {
-                     return Container(
-                       margin:  EdgeInsets.all(10),
-                       child:  Row(
-                         crossAxisAlignment: CrossAxisAlignment.start,
-                         children: <Widget>[
-                           Container(
-                               margin:EdgeInsets.only(right: 20.0),//
-                               child:
-                               CircleAvatar(
-                                 child:  Text(userName[0]),
-                               )
-                           ),
-                           Flexible(
-                             child:  Column(
-                               crossAxisAlignment: CrossAxisAlignment.start,
-                               children: <Widget>[
-                                 Text(
-                                   snapshot.data.docs[index].data()['userName'] + ', '
-                                       + snapshot.data.docs[index].data()['date'].toString(),
-                                   style: TextStyle(
-                                     fontSize: 14,
-                                     color: Colors.indigo,
-                                     fontFamily: 'OpenSans',
-                                     fontWeight: FontWeight.bold,
-                                   ),
-                                 ),
+            child: FirebaseAnimatedList(
+              controller: _controller,
 
-                                 Container(
-                                   margin: EdgeInsets.only(top: 6.0),
-                                   padding: EdgeInsets.all(10.0),
-                                   child: Text(snapshot.data.docs[index].data()['message'],
-                                     style: TextStyle(
-                                       fontFamily: 'OpenSans',
-                                       //fontWeight: FontWeight.bold,
-                                     ),),
-                                   decoration:  BoxDecoration(
-                                     color: Colors.indigo.withOpacity(0.4),
-                                     borderRadius: BorderRadius.only(
-                                       bottomLeft: Radius.circular(5.0),
-                                       topRight: Radius.circular(20.0),
-                                       bottomRight: Radius.circular(20.0),
-                                       topLeft: Radius.circular(20.0),
-                                     ),
-                                   ),
-                                 ),
-                               ],
-                             ),
-                           ),
-                         ],
-                       ),
-                     );
-                    },
-                  );
-                },
-              ),
+
+              query: messageRef,
+              // shrinkWrap: true,
+              //reverse: true,
+
+              itemBuilder: (BuildContext context, DataSnapshot snapshot,
+                  Animation<double> animation, int index){
+                message = Message.fromSnapshot(snapshot);
+                return Container(
+                  margin:  EdgeInsets.all(10),
+                  child:  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                          margin:EdgeInsets.only(right: 20.0),//
+                          child:
+                          CircleAvatar(
+                            child:  Text(message.username[0]),
+                          )
+                      ),
+                      Flexible(
+                        child:  Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(message.username + ','
+                                + message.datetime,
+                              //messages[index].username + ', '+
+                              //   messages[index].datetime,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.indigo,
+                                fontFamily: 'OpenSans',
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            Container(
+                              margin: EdgeInsets.only(top: 6.0),
+                              padding: EdgeInsets.all(10.0),
+                              child: Text(message.text,
+                                style: TextStyle(
+                                  fontFamily: 'OpenSans',
+                                  //fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              decoration:  BoxDecoration(
+                                color: Colors.indigo.withOpacity(0.4),
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(5.0),
+                                  topRight: Radius.circular(20.0),
+                                  bottomRight: Radius.circular(20.0),
+                                  topLeft: Radius.circular(20.0),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
+
           Divider(height: 2.0),
+
+
           Container(
             decoration:  BoxDecoration(color: Theme.of(context).cardColor),
             child: _InputField(),
+
           ),
         ]),
       ),
+
       backgroundColor: Color.fromRGBO(236, 241, 247, 1),
     );
   }
@@ -154,11 +195,11 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         margin: EdgeInsets.symmetric(horizontal: 15.0),
         child:  Row(
           children: <Widget>[
-            Expanded(
+            Flexible(
               child:  TextField(
                 controller: _textController,
                 decoration:
-                InputDecoration.collapsed(hintText: "Write a message..."),
+                InputDecoration.collapsed(hintText: "Write a message..." + test),
                 onChanged: (String messageText) {
                   setState(() {
                     RegExp regExp = new RegExp(r"(\S+)");
@@ -174,6 +215,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               child: Container(
                 margin:  EdgeInsets.symmetric(horizontal: 3.0),
                 child:
+                //відправляє користувача за замовчуванням
                 IconButton(
                   onPressed :
                   _isWriting ? () => _submitMessage(_textController.text.trim(), userName) : null,
@@ -187,16 +229,23 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _submitMessage(String text, String userName) {
-    FirebaseDataStoreProvider firebaseDataStore = new FirebaseDataStoreProvider();
-    firebaseDataStore.writeMessage(DateTime.now(), text, userName);
+
+  Future<void> _submitMessage(String text, String userName) async {
+
+    String username = await sharedPreference.getUserName();
+    String datetime = DateFormat('HH:mm  dd.MM.yy').format(DateTime.now()).toString();
+    if(username == '')
+      username = "default";
+    messageRef
+        .push()
+        .set({
+      'username': username,
+      'datetime' : datetime,
+      'text' : text
+    });
     _textController.clear();
     setState(() {
       _isWriting = false;
     });
   }
 }
-
-
-
-

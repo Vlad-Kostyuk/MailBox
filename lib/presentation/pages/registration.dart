@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:animated_button/animated_button.dart';
 import 'package:mailbox/core/auth/firabase_auth.dart';
+import 'package:mailbox/presentation/pages/chat.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
 
-import 'chat.dart';
 import 'login.dart';
-
+//Serhii Senyk, 30.01.2021
+//проходить реєстрацію , автентифікацію, але не зберігає ім'я
 
 class RegistrationScreen extends StatefulWidget {
   RegistrationScreen({this.toggleView});
@@ -224,9 +225,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     this.errorPassword = '';
 
     if(checkLoginIsNull(email, password)) {
-      final FirebaseAuthService loginService = new FirebaseAuthService();
-      loginService.registrationNewUser(email.trim(), password.trim());
-      saveUserEmailAndPassport();
+      final LoginService loginService = new LoginService();
+      loginService.registrationNewUser(email.trim(), password.trim(), userName.trim());
+      saveUserEmailAndPassword();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => ChatScreen()),
@@ -235,12 +236,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  void saveUserEmailAndPassport() {
+  void saveUserEmailAndPassword() {
     widget.sharedPreference.setBoolUserIsLogin(true);
     widget.sharedPreference.setUserLogin(email);
     widget.sharedPreference.setUserPassword(password);
+    widget.sharedPreference.setUserName(userName);
   }
 
+
+  //некоректно спрацювало коли немає такого користувача
   void validatedErrorCode(var resultLoginService) {
     switch (resultLoginService) {
       case "ERROR_INVALID_EMAIL":
@@ -331,5 +335,3 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 }
-
-
