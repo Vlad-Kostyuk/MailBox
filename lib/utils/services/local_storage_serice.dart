@@ -9,16 +9,6 @@ class SharedPreference {
     preference.setString('userPassword', '');
   }
 
-  setBoolUserIsLogin(bool userIsLogin) async {
-    try {
-      SharedPreferences preference = await SharedPreferences.getInstance();
-      preference.setBool('userIsLogin', userIsLogin);
-      return true;
-    } catch (error) {
-      print(error);
-      return error;
-    }
-  }
 
   getBoolUserIsLogin() async {
     try {
@@ -50,6 +40,17 @@ class SharedPreference {
     }
   }
 
+  setBoolUserIsLogin(bool userIsLogin) async {
+    try {
+      SharedPreferences preference = await SharedPreferences.getInstance();
+      preference.setBool('userIsLogin', userIsLogin);
+      return true;
+    } catch (error) {
+      print(error);
+      return error;
+    }
+  }
+
   setUserLogin(String userLogin) async {
     try {
       SharedPreferences preference = await SharedPreferences.getInstance();
@@ -62,6 +63,7 @@ class SharedPreference {
 
   setUserPassword(String userPassword) async {
     try {
+      print(userPassword);
       SharedPreferences preference = await SharedPreferences.getInstance();
       return preference.setString('userPassword', userPassword);
     } catch (error) {
@@ -69,5 +71,4 @@ class SharedPreference {
       return error;
     }
   }
-
 }

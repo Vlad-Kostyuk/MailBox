@@ -1,4 +1,5 @@
 import 'package:animated_button/animated_button.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -7,11 +8,12 @@ import 'package:mailbox/core/auth/firabase_auth.dart';
 import 'package:mailbox/modules/dashboard/bloc/login/login_bloc.dart';
 import 'package:mailbox/modules/dashboard/bloc/login/login_event.dart';
 import 'package:mailbox/modules/dashboard/bloc/login/login_state.dart';
-
+import 'package:mailbox/presentation/pages/chat.dart';
 import 'package:mailbox/presentation/pages/registration.dart';
 import 'package:mailbox/utils/services/connectivity_internet.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
-import 'chat.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class LoginScreen extends StatefulWidget {
   final _formKey = GlobalKey<FormState>();
@@ -39,12 +41,19 @@ class _LoginScreenState extends State<LoginScreen> {
   });
 
   @override
-  void initState() {
+  initState() {
     super.initState();
     InternetConnectivity internetConnectivity = new InternetConnectivity(context);
     internetConnectivity.initializedInternetConnectivity();
-    widget.sharedPreference.initializedSharedPreference();
     BlocProvider.of<BlocLogin>(context).add(LoginPageLoadedEvent());
+    checkUserIsLoginNoeNull();
+  }
+
+  checkUserIsLoginNoeNull() async {
+    SharedPreferences preference = await SharedPreferences.getInstance();
+    print(preference.containsKey('userIsLogin'));
+    if(!preference.containsKey('userIsLogin'))
+      widget.sharedPreference.initializedSharedPreference();
   }
 
   @override
@@ -62,8 +71,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         child: BlocBuilder<BlocLogin, LoginState>(
           builder: (BuildContext context, state) {
-
-            print(state);
 
             if(state is LoginPageLoadingState) {
                return Container(
@@ -83,7 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
             if(state is LoginPageUserIsLoginState) {
               SchedulerBinding.instance.addPostFrameCallback((_) {
-                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ChatScreen()), (Route<dynamic> route) => false);
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder:
+                    (context) => ChatScreen()), (Route<dynamic> route) => false);
               });
             }
 
@@ -382,8 +390,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool checkLoginIsNull(String email, String password) {
     if(password == null  && email == null) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = 'Pls write you password!';
+        this.errorEmail = 'Please write your email!';
+        this.errorPassword = 'Please write your password!';
       });
       return false;
     }
@@ -391,14 +399,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if(password == null && email != null) {
       setState(() {
         this.errorEmail = '';
-        this.errorPassword = 'Pls write you password!';
+        this.errorPassword = 'Please write your password!';
       });
       return false;
     }
 
     if(email == null && password != null) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
+        this.errorEmail = 'Please write your email!';
         this.errorPassword = '';
       });
       return false;
@@ -410,8 +418,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool checkLoginIsNotEmpty(String email, String password) {
     if(password.isEmpty  && email.isEmpty) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
-        this.errorPassword = 'Pls write you password!';
+        this.errorEmail = 'Please write your email!';
+        this.errorPassword = 'Please write your password!';
       });
       return false;
     }
@@ -419,14 +427,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if(password.isEmpty && email.isNotEmpty) {
       setState(() {
         this.errorEmail = '';
-        this.errorPassword = 'Pls write you password!';
+        this.errorPassword = 'Please write your password!';
       });
       return false;
     }
 
     if(email.isEmpty && password.isNotEmpty) {
       setState(() {
-        this.errorEmail = 'Pls write you email!';
+        this.errorEmail = 'Please write your email!';
         this.errorPassword = '';
       });
       return false;
@@ -435,5 +443,3 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 }
-
-

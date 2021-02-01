@@ -18,6 +18,7 @@ class BlocLogin extends Bloc<LoginEvent, LoginState> {
     try {
       final FirebaseAuthService loginService = new FirebaseAuthService();
       var tmp  = await loginService.reauthenticatingUser();
+      print(tmp);
       if(tmp) {
         yield LoginPageUserIsLoginState();
       } else {

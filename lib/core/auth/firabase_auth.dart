@@ -3,74 +3,68 @@ import 'package:mailbox/modules/dashboard/models/User.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
 
 class FirebaseAuthService {
-  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  final SharedPreference sharedPreference = new SharedPreference();
   authenticationState() {
-    _firebaseAuth.authStateChanges().listen((event) {
+    FirebaseAuth.instance.authStateChanges().listen((event) {
       print(event);
       if (event == null) {
-        print('User is currently signed out!');
         return false;
       } else {
-        print('User is signed in!');
         return true;
       }
-
     });
   }
 
   signIn(String email, String password) async {
     try {
-      final UserCredential userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email,
           password: password
       );
-      print(userCredential);
       return true;
     } catch (error) {
-      print(error.code);
-      return error.code;
+      print(error);
+      return error;
     }
   }
 
-  registrationNewUser(String email, String password) async {
+  registrationNewUser(String email, String password, String username) async {
+    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
     try {
-      final UserCredential userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+      await _firebaseAuth.currentUser.updateProfile(displayName: username);
+      await userCredential.user.reload();
       print(userCredential);
       return true;
     } catch (error) {
-      print(error.code);
       return error.code;
     }
   }
 
   signingOut() async {
     try {
-      await _firebaseAuth.signOut();
+      await FirebaseAuth.instance.signOut();
       final SharedPreference sharedPreference = new SharedPreference();
       sharedPreference.setBoolUserIsLogin(false);
       sharedPreference.setUserLogin('');
       sharedPreference.setUserPassword('');
       return true;
     } catch (error) {
-      print(error.code);
       return error.code;
     }
   }
 
   Future<Users> getUser() async {
-    if (_firebaseAuth.currentUser != null) {
-      final Users users = new Users(id: _firebaseAuth.currentUser.uid, email: _firebaseAuth.currentUser.email, userName: _firebaseAuth.currentUser.displayName);
+    if (FirebaseAuth.instance.currentUser != null) {
+      final Users users = new Users(id: FirebaseAuth.instance.currentUser.uid, email: FirebaseAuth.instance.currentUser.email, userName: FirebaseAuth.instance.currentUser.displayName);
       return users;
     }
   }
 
   Future<bool> userDisconnect() async {
     try {
-      await _firebaseAuth.signOut();
+      await FirebaseAuth.instance.signOut();
       return true;
     } catch(e, stacktrace) {
       print(e.toString());
@@ -79,21 +73,23 @@ class FirebaseAuthService {
     }
   }
 
-
-
   Future<bool> reauthenticatingUser() async {
     final SharedPreference sharedPreference = new SharedPreference();
     bool tmp = await sharedPreference.getBoolUserIsLogin();
-    if(tmp) {
-      final String _email = await sharedPreference.getUserLogin();
-      final String _password = await sharedPreference.getUserPassword();
-
-      try {
-        await FirebaseAuth.instance.currentUser.reauthenticateWithCredential(EmailAuthProvider.credential(email: _email, password: _password));
-        return true;
-      } catch(e, stacktrace) {
-        print(e.toString());
-        print(stacktrace.toString());
+    if(tmp != null) {
+      if(tmp) {
+        final String _email = await sharedPreference.getUserLogin();
+        final String _password = await sharedPreference.getUserPassword();
+        try {
+          await FirebaseAuth.instance.currentUser.reauthenticateWithCredential(EmailAuthProvider.credential(email: _email, password: _password));
+          return true;
+        } catch(e, stacktrace) {
+          print(e.toString());
+          print(stacktrace.toString());
+          return false;
+        }
+      } else {
+        return false;
       }
     } else {
       return false;
