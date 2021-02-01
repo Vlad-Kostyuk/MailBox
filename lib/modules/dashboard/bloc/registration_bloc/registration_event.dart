@@ -1,4 +1,2 @@
 
 class RegistrationEvent {}
-
-class RegistrationNewUserEvent {}

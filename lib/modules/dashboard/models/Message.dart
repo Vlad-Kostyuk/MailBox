@@ -1,5 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
-
+//added 30.01.2021 Serhii Senyk
 class Message {
   String key;
   String text;
@@ -13,4 +13,11 @@ class Message {
         text = snapshot.value["text"],
         datetime = snapshot.value["datetime"],
         username = snapshot.value["username"];
+
+/*toJson() {
+    return {
+      "title": title,
+      "body": body,
+    };
+  }*/
 }

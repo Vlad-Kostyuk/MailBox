@@ -1,33 +1,34 @@
 {
   "project_info": {
-    "project_number": "871365375475",
-    "project_id": "mailbox2-244c1",
-    "storage_bucket": "mailbox2-244c1.appspot.com"
+    "project_number": "812485673618",
+    "firebase_url": "https://flutter-mailbox-default-rtdb.firebaseio.com",
+    "project_id": "flutter-mailbox",
+    "storage_bucket": "flutter-mailbox.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:871365375475:android:b5f13fb0cc7682f7594e86",
+        "mobilesdk_app_id": "1:812485673618:android:1ee004432bc91f9d9f5c4b",
         "android_client_info": {
           "package_name": "com.example.mailbox"
         }
       },
       "oauth_client": [
         {
-          "client_id": "871365375475-vgchepaqm4081j8a7c2nmc5n7c6hgl0f.apps.googleusercontent.com",
+          "client_id": "812485673618-130fsv0v20to6ghf7vrubltmespsfe5t.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDT8SOBuRNfgarM6qxtL0G3WNzZijsghRM"
+          "current_key": "AIzaSyB1e0xydlk0wCu05WU9rM-wSTLs6alGw6k"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "871365375475-vgchepaqm4081j8a7c2nmc5n7c6hgl0f.apps.googleusercontent.com",
+              "client_id": "812485673618-130fsv0v20to6ghf7vrubltmespsfe5t.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

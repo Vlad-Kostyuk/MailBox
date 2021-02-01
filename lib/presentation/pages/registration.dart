@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:animated_button/animated_button.dart';
 import 'package:mailbox/core/auth/firabase_auth.dart';
+import 'package:mailbox/presentation/pages/chat.dart';
 import 'package:mailbox/utils/services/local_storage_serice.dart';
-import 'chat.dart';
-import 'login.dart';
 
+import 'login.dart';
+//Serhii Senyk, 30.01.2021
+//проходить реєстрацію , автентифікацію, але не зберігає ім'я
 
 class RegistrationScreen extends StatefulWidget {
   RegistrationScreen({this.toggleView});
@@ -18,7 +20,6 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  String errorName = '';
   String errorEmail = '';
   String errorPassword = '';
   String email = '';
@@ -96,8 +97,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
 
-                    this.errorName.isNotEmpty ? Text(this.errorName, style: TextStyle(color: Colors.red)) : Container(),
-
                     SizedBox(height: 10.0),
                     Container(
                       height: 60.0,
@@ -169,7 +168,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
 
                         onPressed: () {
-                          validatedLogin(email, password, userName);
+                          validatedLogin(email, password);
                         },
                           duration: 100,
                           height: 54,
@@ -221,27 +220,31 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   }
 
-  validatedLogin(String email, String password, String userName) async {
-    this.errorName = '';
+  validatedLogin(String email, String password) async {
     this.errorEmail = '';
     this.errorPassword = '';
 
-    if(checkLoginIsNull(email, password, userName)) {
-      final FirebaseAuthService loginService = new FirebaseAuthService();
+    if(checkLoginIsNull(email, password)) {
+      final LoginService loginService = new LoginService();
       loginService.registrationNewUser(email.trim(), password.trim(), userName.trim());
-      saveUserEmailAndPassport();
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => ChatScreen()),
+      saveUserEmailAndPassword();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => ChatScreen()),
             (Route<dynamic> route) => false,
       );
     }
   }
 
-  void saveUserEmailAndPassport() {
+  void saveUserEmailAndPassword() {
     widget.sharedPreference.setBoolUserIsLogin(true);
     widget.sharedPreference.setUserLogin(email);
     widget.sharedPreference.setUserPassword(password);
+    widget.sharedPreference.setUserName(userName);
   }
 
+
+  //некоректно спрацювало коли немає такого користувача
   void validatedErrorCode(var resultLoginService) {
     switch (resultLoginService) {
       case "ERROR_INVALID_EMAIL":
@@ -276,26 +279,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  bool checkLoginIsNull(String email, String password, String userName) {
-    if(userName == null) {
-      setState(() {
-        this.errorName = 'Pls write you Name!';
-      });
-    }
-
-    if(email == null) {
+  bool checkLoginIsNull(String email, String password) {
+    if(password == null  && email == null) {
       setState(() {
         this.errorEmail = 'Pls write you email!';
-      });
-    }
-
-    if(password == null) {
-      setState(() {
         this.errorPassword = 'Pls write you password!';
       });
+      return false;
     }
 
-    if(password == null || email == null || userName == null) {
+    if(password == null && email != null) {
+      setState(() {
+        this.errorEmail = '';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(email == null && password != null) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = '';
+      });
       return false;
     } else {
       return checkLoginIsNotEmpty(email, password);
@@ -303,30 +308,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   bool checkLoginIsNotEmpty(String email, String password) {
-    if(userName.isEmpty) {
-      setState(() {
-        this.errorName = 'Pls write you Name!';
-      });
-    }
-
-    if(email.isEmpty) {
+    if(password.isEmpty  && email.isEmpty) {
       setState(() {
         this.errorEmail = 'Pls write you email!';
-      });
-    }
-
-    if(password.isEmpty) {
-      setState(() {
         this.errorPassword = 'Pls write you password!';
       });
+      return false;
     }
 
-    if(password.isEmpty || email.isEmpty || userName.isEmpty) {
+    if(password.isEmpty && email.isNotEmpty) {
+      setState(() {
+        this.errorEmail = '';
+        this.errorPassword = 'Pls write you password!';
+      });
+      return false;
+    }
+
+    if(email.isEmpty && password.isNotEmpty) {
+      setState(() {
+        this.errorEmail = 'Pls write you email!';
+        this.errorPassword = '';
+      });
       return false;
     } else {
       return true;
     }
   }
 }
-
-
